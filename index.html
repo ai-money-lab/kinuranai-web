@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>無料KIN診断 | マヤ暦であなたの使命を知る</title>
+  <meta name="description" content="生年月日を入れるだけで、マヤ暦のKIN番号・太陽の紋章・銀河の音が即わかる無料診断ツール。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark:    #0A0A2E;
+      --bg-card:    #12124A;
+      --bg-panel:   #0E0E3A;
+      --text-main:  #E8E4F0;
+      --text-sub:   #9B96B8;
+      --border:     rgba(155, 150, 184, 0.2);
+
+      /* 紋章カラー */
+      --red-main:    #E53935;
+      --red-glow:    rgba(229, 57, 53, 0.45);
+      --white-main:  #ECEFF1;
+      --white-glow:  rgba(220, 215, 235, 0.45);
+      --blue-main:   #1E88E5;
+      --blue-glow:   rgba(30, 136, 229, 0.45);
+      --yellow-main: #FDD835;
+      --yellow-glow: rgba(253, 216, 53, 0.45);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* 星空背景 */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(74, 20, 140, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(13, 71, 161, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 50%, rgba(10, 10, 46, 0) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    /* ヘッダー */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(74, 20, 140, 0.6), rgba(13, 71, 161, 0.6));
+      border: 1px solid rgba(155, 150, 184, 0.3);
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      color: var(--text-sub);
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.4;
+      background: linear-gradient(135deg, #C8B0FF, #82B1FF, #E8E4F0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: var(--text-sub);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    /* 入力カード */
+    .input-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      margin-bottom: 24px;
+    }
+
+    .input-card h2 {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-sub);
+      text-align: center;
+      margin-bottom: 24px;
+      letter-spacing: 0.08em;
+    }
+
+    .date-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .date-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .date-group label {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      letter-spacing: 0.1em;
+    }
+
+    .date-sep {
+      font-size: 1.2rem;
+      color: var(--text-sub);
+      margin-top: 18px;
+      flex-shrink: 0;
+    }
+
+    select {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 0.95rem;
+      padding: 10px 8px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: rgba(155, 150, 184, 0.5);
+    }
+
+    #sel-year  { width: 90px; }
+    #sel-month { width: 64px; }
+    #sel-day   { width: 64px; }
+
+    .btn-diagnose {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #4A148C, #1A237E);
+      border: 1px solid rgba(155, 150, 184, 0.3);
+      border-radius: 14px;
+      color: #E8E4F0;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-diagnose::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .btn-diagnose:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(74, 20, 140, 0.5);
+    }
+
+    .btn-diagnose:hover::before { opacity: 1; }
+    .btn-diagnose:active { transform: translateY(0); }
+
+    /* 結果カード */
+    .result-card {
+      display: none;
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 36px 28px;
+      margin-bottom: 24px;
+      animation: fadeSlideUp 0.5s ease forwards;
+      border: 1px solid transparent;
+      transition: border-color 0.4s;
+    }
+
+    .result-card.visible { display: block; }
+
+    .result-card.color-red    { border-color: rgba(229, 57, 53, 0.4); }
+    .result-card.color-white  { border-color: rgba(220, 215, 235, 0.4); }
+    .result-card.color-blue   { border-color: rgba(30, 136, 229, 0.4); }
+    .result-card.color-yellow { border-color: rgba(253, 216, 53, 0.4); }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KIN番号 */
+    .kin-display {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .kin-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+    }
+
+    .kin-number {
+      font-family: 'Noto Serif JP', serif;
+      font-size: clamp(4.5rem, 20vw, 7rem);
+      font-weight: 700;
+      line-height: 1;
+      transition: color 0.4s, text-shadow 0.4s;
+    }
+
+    /* KINグロー */
+    .kin-number.glow-red {
+      color: var(--red-main);
+      text-shadow: 0 0 20px var(--red-glow), 0 0 60px var(--red-glow), 0 0 120px rgba(229,57,53,0.2);
+    }
+    .kin-number.glow-white {
+      color: var(--white-main);
+      text-shadow: 0 0 20px var(--white-glow), 0 0 60px var(--white-glow), 0 0 120px rgba(220,215,235,0.2);
+    }
+    .kin-number.glow-blue {
+      color: var(--blue-main);
+      text-shadow: 0 0 20px var(--blue-glow), 0 0 60px var(--blue-glow), 0 0 120px rgba(30,136,229,0.2);
+    }
+    .kin-number.glow-yellow {
+      color: var(--yellow-main);
+      text-shadow: 0 0 20px var(--yellow-glow), 0 0 60px var(--yellow-glow), 0 0 120px rgba(253,216,53,0.2);
+    }
+
+    /* 紋章・音セクション */
+    .badge-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .badge-item {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 20px;
+      text-align: center;
+      flex: 1;
+      min-width: 130px;
+      max-width: 220px;
+    }
+
+    .badge-item .badge-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+
+    .badge-item .badge-value {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      transition: color 0.4s;
+    }
+
+    .badge-item .badge-sub {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+    }
+
+    /* 色クラス */
+    .text-red    { color: var(--red-main); }
+    .text-white  { color: var(--white-main); }
+    .text-blue   { color: var(--blue-main); }
+    .text-yellow { color: var(--yellow-main); }
+
+    /* 説明テキスト */
+    .desc-box {
+      background: var(--bg-panel);
+      border-left: 3px solid;
+      border-radius: 0 12px 12px 0;
+      padding: 18px 20px;
+      margin-bottom: 28px;
+      transition: border-color 0.4s;
+    }
+
+    .desc-box.border-red    { border-color: var(--red-main); }
+    .desc-box.border-white  { border-color: var(--white-main); }
+    .desc-box.border-blue   { border-color: var(--blue-main); }
+    .desc-box.border-yellow { border-color: var(--yellow-main); }
+
+    .desc-box p {
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: var(--text-main);
+    }
+
+    /* キーワードタグ */
+    .keyword-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .keyword-tag {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      border: 1px solid;
+      transition: all 0.4s;
+    }
+
+    .keyword-tag.tag-red    { color: var(--red-main);    border-color: rgba(229,57,53,0.4);    background: rgba(229,57,53,0.08); }
+    .keyword-tag.tag-white  { color: var(--white-main);  border-color: rgba(220,215,235,0.4);  background: rgba(220,215,235,0.08); }
+    .keyword-tag.tag-blue   { color: var(--blue-main);   border-color: rgba(30,136,229,0.4);   background: rgba(30,136,229,0.08); }
+    .keyword-tag.tag-yellow { color: var(--yellow-main); border-color: rgba(253,216,53,0.4);   background: rgba(253,216,53,0.08); }
+
+    /* CTA */
+    .cta-block {
+      background: linear-gradient(135deg, rgba(74, 20, 140, 0.4), rgba(13, 71, 161, 0.4));
+      border: 1px solid rgba(155, 150, 184, 0.25);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .cta-block .cta-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .cta-block .cta-desc {
+      font-size: 0.84rem;
+      color: var(--text-sub);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .btn-dm {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #6A1B9A, #283593);
+      border: 1px solid rgba(155,150,184,0.3);
+      border-radius: 50px;
+      color: #E8E4F0;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+
+    .btn-dm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(106, 27, 154, 0.5);
+    }
+
+    /* フォロー誘導 */
+    .follow-block {
+      text-align: center;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 40px;
+    }
+
+    .follow-block .follow-text {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .btn-follow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #4A148C, #1A237E);
+      border: none;
+      border-radius: 50px;
+      color: #E8E4F0;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+
+    .btn-follow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(74, 20, 140, 0.5);
+    }
+
+    .ig-icon {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #E8E4F0;
+      stroke-width: 1.8;
+    }
+
+    /* フッター */
+    .footer {
+      text-align: center;
+      color: var(--text-sub);
+      font-size: 0.72rem;
+      opacity: 0.6;
+      letter-spacing: 0.08em;
+    }
+
+    /* エラーメッセージ */
+    .error-msg {
+      display: none;
+      color: #EF5350;
+      font-size: 0.82rem;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .error-msg.visible { display: block; }
+
+    /* レスポンシブ */
+    @media (max-width: 400px) {
+      .input-card { padding: 24px 18px; }
+      .result-card { padding: 28px 18px; }
+      .date-row { gap: 6px; }
+      #sel-year { width: 82px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="header-badge">マヤ暦 ドリームスペル</div>
+    <h1>無料KIN診断</h1>
+    <p>あなたの生年月日から<br>
+    宇宙が示す使命を読み解く</p>
+  </header>
+
+  <!-- 入力カード -->
+  <div class="input-card">
+    <h2>生年月日を選んでください</h2>
+    <div class="date-row">
+      <div class="date-group">
+        <label>年</label>
+        <select id="sel-year"></select>
+      </div>
+      <span class="date-sep">/</span>
+      <div class="date-group">
+        <label>月</label>
+        <select id="sel-month"></select>
+      </div>
+      <span class="date-sep">/</span>
+      <div class="date-group">
+        <label>日</label>
+        <select id="sel-day"></select>
+      </div>
+    </div>
+    <button class="btn-diagnose" onclick="diagnose()">今すぐ診断する</button>
+    <div class="error-msg" id="error-msg">生年月日を正しく選択してください。</div>
+  </div>
+
+  <!-- 結果カード -->
+  <div class="result-card" id="result-card">
+
+    <!-- KIN番号 -->
+    <div class="kin-display">
+      <div class="kin-label">あなたのKIN番号</div>
+      <div class="kin-number" id="kin-number">--</div>
+    </div>
+
+    <!-- 紋章・音バッジ -->
+    <div class="badge-row">
+      <div class="badge-item">
+        <div class="badge-label">太陽の紋章</div>
+        <div class="badge-value" id="emblem-name">--</div>
+        <div class="badge-sub" id="emblem-keyword">--</div>
+      </div>
+      <div class="badge-item">
+        <div class="badge-label">銀河の音</div>
+        <div class="badge-value" id="tone-name">--</div>
+        <div class="badge-sub" id="tone-keyword">--</div>
+      </div>
+    </div>
+
+    <!-- キーワードタグ -->
+    <div class="keyword-row" id="keyword-row"></div>
+
+    <!-- 説明文 -->
+    <div class="desc-box" id="desc-box">
+      <p id="desc-text"></p>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-block">
+      <div class="cta-title">もっと深く知りたいですか？</div>
+      <div class="cta-desc">
+        紋章が持つ深層の意味・人生テーマ・<br>
+        相性のいいKIN番号・今年の流れを<br>
+        個別に鑑定しています。
+      </div>
+      <a class="btn-dm" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">
+        詳しい鑑定はDMで
+      </a>
+    </div>
+
+    <!-- フォロー誘導 -->
+    <div class="follow-block">
+      <div class="follow-text">
+        毎日のKINエネルギー・星読みを<br>
+        Instagramで発信しています。
+      </div>
+      <a class="btn-follow" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">
+        <svg class="ig-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="4.5"/>
+          <circle cx="17.5" cy="6.5" r="1" fill="#E8E4F0"/>
+        </svg>
+        @kinuranai をフォロー
+      </a>
+    </div>
+
+  </div><!-- /result-card -->
+
+  <footer class="footer">
+    マヤ暦ドリームスペル (Jose Arguelles) 方式で算出
+  </footer>
+
+</div><!-- /container -->
+
+<script>
+// =====================================================================
+// Maya Calendar KIN Calculator (JS port of maya_kin_calculator.py)
+// Anchor: 1972/3/4 = KIN 135  |  Dreamspell - Feb29 does NOT advance KIN
+// =====================================================================
+
+const ANCHOR = { year: 1972, month: 3, day: 4 };
+const ANCHOR_KIN = 135;
+
+function isLeapYear(y) {
+  return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+}
+
+function daysBetween(d1, d2) {
+  // Returns d2 - d1 in days (can be negative)
+  return Math.round((d2 - d1) / 86400000);
+}
+
+function countLeapDaysBetween(d1, d2) {
+  // Count Feb 29 leap days strictly: d1 < leap_day <= d2
+  if (d2 <= d1) return 0;
+  const start = d1 < d2 ? d1 : d2;
+  const end   = d1 < d2 ? d2 : d1;
+  let count = 0;
+  for (let y = start.getFullYear(); y <= end.getFullYear(); y++) {
+    if (!isLeapYear(y)) continue;
+    const leapDay = new Date(y, 1, 29); // Feb 29
+    if (leapDay > start && leapDay <= end) count++;
+  }
+  return count;
+}
+
+function calculateKin(year, month, day) {
+  const anchor = new Date(ANCHOR.year, ANCHOR.month - 1, ANCHOR.day);
+  const target = new Date(year, month - 1, day);
+
+  const rawDelta = daysBetween(anchor, target);
+  let leapOffset;
+  if (rawDelta >= 0) {
+    leapOffset = countLeapDaysBetween(anchor, target);
+  } else {
+    leapOffset = -countLeapDaysBetween(target, anchor);
+  }
+
+  const adjusted = rawDelta - leapOffset;
+  const kin = ((ANCHOR_KIN - 1 + adjusted) % 260 + 260) % 260 + 1;
+  return kin;
+}
+
+function getEmblemNumber(kin) {
+  const n = kin % 20;
+  return n === 0 ? 20 : n;
+}
+
+function getToneNumber(kin) {
+  const n = kin % 13;
+  return n === 0 ? 13 : n;
+}
+
+// =====================================================================
+// 紋章データ (20種)
+// =====================================================================
+const EMBLEMS = {
+  1:  { ja: "赤い龍",           color: "red",    keywords: ["母性", "愛情", "ゼロから生む"],
+        desc: "全てを包み込む愛のエネルギーを持つ存在。誰かのために尽くすことで自分も輝く。\n新しいものを生み出す創造力と、守り育てる母性が最大の才能。\n深い愛情で人々を繋ぐ、生命力あふれる紋章。" },
+
+  2:  { ja: "白い風",           color: "white",  keywords: ["感性", "共感", "メッセンジャー"],
+        desc: "宇宙からのメッセージを受け取り、言葉や音楽で届ける使命を持つ。\n鋭い感性と共感力で、見えない世界と現実を繋ぐ架け橋になる。\n表現することで世界に光をもたらす、感性豊かな紋章。" },
+
+  3:  { ja: "青い夜",           color: "blue",   keywords: ["夢", "目標", "直感"],
+        desc: "豊かさと夢が結びついた、直感と想像力に満ちた存在。\n内側に広大な宇宙を持ち、ありありとした夢を現実化する力がある。\n眠れる才能が花開く時、世界を変えるビジョンが生まれる紋章。" },
+
+  4:  { ja: "黄色い種",         color: "yellow", keywords: ["探求", "学習", "開花"],
+        desc: "知識と知恵を集め、最高の花を咲かせるための旅を続ける存在。\n好奇心旺盛で探求心が強く、あらゆる場所から学びを得る才能がある。\n蒔いた種が大きく実る時、周囲に豊かさをもたらす紋章。" },
+
+  5:  { ja: "赤い蛇",           color: "red",    keywords: ["情熱", "努力", "本能"],
+        desc: "生命力と情熱が全身にみなぎる、本能的な強さを持つ存在。\nひとつのことに集中するフォーカス力が並外れており、困難を乗り越える意志がある。\n脱皮を繰り返しながら進化し続ける、変容の紋章。" },
+
+  6:  { ja: "白い世界の橋渡し", color: "white",  keywords: ["平和", "おもてなし", "繋ぐ"],
+        desc: "異なる世界や人々の間に橋を架け、平和をもたらす使命を持つ。\n手放しと受容の循環の中で、絶妙なバランスを保つ才能がある。\n見えない世界と現実を繋ぐ、橋渡し役の紋章。" },
+
+  7:  { ja: "青い手",           color: "blue",   keywords: ["癒し", "奉仕", "達成"],
+        desc: "手から発せられる癒しのエネルギーで周囲を回復させる存在。\n目標達成への強い意志と、人のために行動する奉仕の精神を持つ。\n触れるものすべてに可能性をもたらす、完成の紋章。" },
+
+  8:  { ja: "黄色い星",         color: "yellow", keywords: ["美意識", "調和", "アート"],
+        desc: "宇宙の美しさと調和を体現する、アーティスティックな存在。\n洗練された美意識で周囲を彩り、優雅さを纏って生きる才能がある。\n星の輝きのように、存在するだけで世界を美しくする紋章。" },
+
+  9:  { ja: "赤い月",           color: "red",    keywords: ["信念", "改革", "浄化"],
+        desc: "流れのエネルギーを受け取り、世界を浄化する力を持つ存在。\n月のように満ち欠けしながらも、その信念の揺るぎなさで周囲を導く。\n感情の波を乗りこなし、変化の流れを作り出す紋章。" },
+
+  10: { ja: "白い犬",           color: "white",  keywords: ["忠誠心", "家族愛", "信頼"],
+        desc: "愛と忠誠心が溢れる、深い絆を育てる存在。\n家族や仲間を守ることへの献身と、どんな時も信頼できる誠実さがある。\n純粋な愛情で人の心を開き、絆を深める紋章。" },
+
+  11: { ja: "青い猿",           color: "blue",   keywords: ["アイデア", "ひらめき", "遊び"],
+        desc: "遊び心とひらめきで世界を驚かせる、発想豊かな存在。\nユーモアの中に深い知恵を隠し持ち、楽しみながら問題を解決する。\n魔法のような発想で人々を喜ばせる、創造の紋章。" },
+
+  12: { ja: "黄色い人",         color: "yellow", keywords: ["こだわり", "自由", "一芸"],
+        desc: "自由意志と個性を輝かせながら、己の道を突き進む存在。\n一つのことを極めるこだわりと、型にはまらない自由な発想を持つ。\n自分らしさを全開にして、豊かさを体現する紋章。" },
+
+  13: { ja: "赤い空歩く人",     color: "red",    keywords: ["奉仕", "指導", "探検"],
+        desc: "天と地を繋ぎ、新しい世界を探求する冒険者。\n高い視点で物事を俯瞰しながら、地に足のついた行動で夢を実現する。\n奉仕の精神を持ちながら、人々を新しい地平へ導く紋章。" },
+
+  14: { ja: "白い魔法使い",     color: "white",  keywords: ["誠実", "魅力", "受容"],
+        desc: "時間を超えた知恵と魅力で、現実を変容させる力を持つ存在。\n受容と誠実さで人々を惹きつけ、魔法のように状況を好転させる。\n純粋な心に宿る力で奇跡を起こす、魔法の紋章。" },
+
+  15: { ja: "青い鷲",           color: "blue",   keywords: ["先見性", "論理", "俯瞰"],
+        desc: "高い視点から全体を見渡し、未来を見通す先見の明を持つ存在。\n論理的思考と直感が融合し、誰も気づかないパターンを発見する才能がある。\n鷲の目で真実を見極め、創造的なビジョンを示す紋章。" },
+
+  16: { ja: "黄色い戦士",       color: "yellow", keywords: ["チャレンジ", "行動力", "勇気"],
+        desc: "勇気と行動力で困難に立ち向かう、戦士の魂を持つ存在。\n恐れを知りながらも前進し、知性と意志で道を切り開く力がある。\n問いを立て、答えを求めて進む知の戦士の紋章。" },
+
+  17: { ja: "赤い地球",         color: "red",    keywords: ["思いやり", "絆", "ナビゲーション"],
+        desc: "シンクロニシティを引き寄せ、宇宙のリズムと共鳴して生きる存在。\n思いやりと包容力で人々の心を繋ぎ、自然なナビゲーションで道を示す。\n地球のように全てを包み込む、共鳴の紋章。" },
+
+  18: { ja: "白い鏡",           color: "white",  keywords: ["自立心", "礼節", "真実"],
+        desc: "真実を映す鏡のように、世界の本質を見極める存在。\n自立心と礼節を持ちながら、無限の可能性をシンプルに反映する。\n内なる秩序と誠実さで、本物の美しさを示す紋章。" },
+
+  19: { ja: "青い嵐",           color: "blue",   keywords: ["集中力", "パワー", "変容"],
+        desc: "強大なエネルギーで変容と革新をもたらす、嵐のような存在。\n圧倒的な集中力と行動力で、旧来のものを壊し新しい世界を創り出す。\n変化の渦中にあっても揺るぎない、変容の紋章。" },
+
+  20: { ja: "黄色い太陽",       color: "yellow", keywords: ["明るさ", "責任感", "輝き"],
+        desc: "太陽のような輝きで周囲を照らし、全ての命に温もりを与える存在。\n高い責任感と使命感を持ち、明るさで人々に希望をもたらす。\n宇宙の光として全てを照らす、輝きの紋章。" },
+};
+
+// =====================================================================
+// 銀河の音データ (13種)
+// =====================================================================
+const TONES = {
+  1:  { ja: "音1 磁気",    keyword: "率直・信頼" },
+  2:  { ja: "音2 月",      keyword: "白黒思考・直感" },
+  3:  { ja: "音3 電気",    keyword: "素直・調整役" },
+  4:  { ja: "音4 自己存在",keyword: "探求心・職人" },
+  5:  { ja: "音5 倍音",    keyword: "責任感・影のリーダー" },
+  6:  { ja: "音6 律動",    keyword: "冷静・転機" },
+  7:  { ja: "音7 共鳴",    keyword: "第六感・神秘" },
+  8:  { ja: "音8 銀河",    keyword: "調和・母性愛" },
+  9:  { ja: "音9 太陽",    keyword: "集中力・拡張" },
+  10: { ja: "音10 惑星",   keyword: "プロデュース力" },
+  11: { ja: "音11 分光",   keyword: "破壊と再生" },
+  12: { ja: "音12 水晶",   keyword: "問題解決・共有" },
+  13: { ja: "音13 宇宙",   keyword: "変容・超越" },
+};
+
+// =====================================================================
+// セレクトボックス初期化
+// =====================================================================
+function initSelects() {
+  const selYear  = document.getElementById('sel-year');
+  const selMonth = document.getElementById('sel-month');
+  const selDay   = document.getElementById('sel-day');
+
+  // 年: 1930〜2010
+  for (let y = 2010; y >= 1930; y--) {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y + '年';
+    selYear.appendChild(opt);
+  }
+  // デフォルト1990
+  selYear.value = 1990;
+
+  // 月
+  for (let m = 1; m <= 12; m++) {
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = m + '月';
+    selMonth.appendChild(opt);
+  }
+  selMonth.value = 7;
+
+  // 日
+  for (let d = 1; d <= 31; d++) {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d + '日';
+    selDay.appendChild(opt);
+  }
+  selDay.value = 5;
+}
+
+// =====================================================================
+// 診断実行
+// =====================================================================
+function diagnose() {
+  const year  = parseInt(document.getElementById('sel-year').value);
+  const month = parseInt(document.getElementById('sel-month').value);
+  const day   = parseInt(document.getElementById('sel-day').value);
+
+  // 日付バリデーション
+  const errEl = document.getElementById('error-msg');
+  try {
+    const testDate = new Date(year, month - 1, day);
+    if (
+      testDate.getFullYear() !== year ||
+      testDate.getMonth() + 1 !== month ||
+      testDate.getDate() !== day
+    ) {
+      throw new Error('invalid');
+    }
+  } catch(e) {
+    errEl.classList.add('visible');
+    return;
+  }
+  errEl.classList.remove('visible');
+
+  const kin = calculateKin(year, month, day);
+  const emblemNum = getEmblemNumber(kin);
+  const toneNum   = getToneNumber(kin);
+  const emblem    = EMBLEMS[emblemNum];
+  const tone      = TONES[toneNum];
+  const color     = emblem.color;
+
+  // 結果カードのクラスをリセット
+  const card = document.getElementById('result-card');
+  card.className = 'result-card visible color-' + color;
+
+  // KIN番号
+  const kinEl = document.getElementById('kin-number');
+  kinEl.textContent = kin;
+  kinEl.className = 'kin-number glow-' + color;
+
+  // 紋章
+  const emblemNameEl = document.getElementById('emblem-name');
+  emblemNameEl.textContent = emblem.ja;
+  emblemNameEl.className = 'badge-value text-' + color;
+
+  document.getElementById('emblem-keyword').textContent = emblem.keywords.join('・');
+
+  // 音
+  const toneNameEl = document.getElementById('tone-name');
+  toneNameEl.textContent = tone.ja;
+  toneNameEl.className = 'badge-value text-' + color;
+  document.getElementById('tone-keyword').textContent = tone.keyword;
+
+  // キーワードタグ
+  const kwRow = document.getElementById('keyword-row');
+  kwRow.innerHTML = '';
+  emblem.keywords.forEach(kw => {
+    const tag = document.createElement('span');
+    tag.className = 'keyword-tag tag-' + color;
+    tag.textContent = kw;
+    kwRow.appendChild(tag);
+  });
+
+  // 説明文
+  const descBox  = document.getElementById('desc-box');
+  descBox.className = 'desc-box border-' + color;
+  document.getElementById('desc-text').innerHTML =
+    emblem.desc.replace(/\n/g, '<br>');
+
+  // スクロール
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// =====================================================================
+// 初期化
+// =====================================================================
+initSelects();
+</script>
+</body>
+</html>
