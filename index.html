@@ -4,118 +4,165 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>無料KIN診断 | マヤ暦であなたの使命を知る</title>
-  <meta name="description" content="生年月日を入れるだけで、マヤ暦のKIN番号・太陽の紋章・銀河の音が即わかる無料診断ツール。">
+  <meta name="description" content="生年月日を入れるだけで、マヤ暦のKIN番号・太陽の紋章・銀河の音・性格・使命・恋愛傾向・2026年運気が即わかる無料診断ツール。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-dark:    #0A0A2E;
-      --bg-card:    #12124A;
-      --bg-panel:   #0E0E3A;
-      --text-main:  #E8E4F0;
-      --text-sub:   #9B96B8;
-      --border:     rgba(155, 150, 184, 0.2);
+      --bg-grad1:   #0D0A35;
+      --bg-grad2:   #140A3E;
+      --bg-card:    #13123A;
+      --bg-panel:   #0F0E32;
+      --text-main:  #EDE8F8;
+      --text-sub:   #9B96C0;
+      --border:     rgba(155, 150, 200, 0.18);
+      --gold:       #FFD700;
+      --gold-glow:  rgba(255, 215, 0, 0.5);
+      --gold-dim:   rgba(255, 215, 0, 0.15);
 
-      /* 紋章カラー */
-      --red-main:    #E53935;
-      --red-glow:    rgba(229, 57, 53, 0.45);
-      --white-main:  #ECEFF1;
-      --white-glow:  rgba(220, 215, 235, 0.45);
-      --blue-main:   #1E88E5;
-      --blue-glow:   rgba(30, 136, 229, 0.45);
-      --yellow-main: #FDD835;
-      --yellow-glow: rgba(253, 216, 53, 0.45);
+      --red-main:    #F05050;
+      --red-glow:    rgba(240, 80, 80, 0.5);
+      --white-main:  #D8D0F0;
+      --white-glow:  rgba(216, 208, 240, 0.5);
+      --blue-main:   #4FC3F7;
+      --blue-glow:   rgba(79, 195, 247, 0.5);
+      --yellow-main: #FFD740;
+      --yellow-glow: rgba(255, 215, 64, 0.5);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background-color: var(--bg-dark);
+      background: linear-gradient(160deg, var(--bg-dark) 0%, var(--bg-grad1) 40%, var(--bg-grad2) 100%);
       color: var(--text-main);
       font-family: 'Noto Sans JP', sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* 星空背景 */
+    /* ========== 星空キャンバス ========== */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 星くず静的 */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse at 20% 20%, rgba(74, 20, 140, 0.18) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 80%, rgba(13, 71, 161, 0.18) 0%, transparent 60%),
-        radial-gradient(ellipse at 50% 50%, rgba(10, 10, 46, 0) 0%, transparent 100%);
+        radial-gradient(ellipse at 15% 15%, rgba(100, 30, 180, 0.22) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 80%, rgba(20, 80, 180, 0.22) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%, rgba(180, 30, 120, 0.08) 0%, transparent 60%);
       pointer-events: none;
       z-index: 0;
     }
 
+    /* ゴールドパーティクル */
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+      100% { transform: translateY(-120px) rotate(360deg); opacity: 0; }
+    }
+    @keyframes pulse-gold {
+      0%, 100% { box-shadow: 0 0 20px var(--gold-glow), 0 0 60px rgba(255,215,0,0.2); }
+      50% { box-shadow: 0 0 35px var(--gold-glow), 0 0 100px rgba(255,215,0,0.35); }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes kinReveal {
+      0% { opacity: 0; transform: scale(0.5); filter: blur(12px); }
+      60% { transform: scale(1.12); filter: blur(0); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes borderGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* ========== コンテナ ========== */
     .container {
       position: relative;
       z-index: 1;
       max-width: 640px;
       margin: 0 auto;
-      padding: 40px 20px 80px;
+      padding: 48px 20px 100px;
     }
 
-    /* ヘッダー */
+    /* ========== ヘッダー ========== */
     .header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 48px;
     }
-
     .header-badge {
       display: inline-block;
-      background: linear-gradient(135deg, rgba(74, 20, 140, 0.6), rgba(13, 71, 161, 0.6));
-      border: 1px solid rgba(155, 150, 184, 0.3);
+      background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,215,0,0.06));
+      border: 1px solid rgba(255,215,0,0.35);
       border-radius: 20px;
-      padding: 6px 18px;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      color: var(--text-sub);
-      margin-bottom: 16px;
+      padding: 6px 20px;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      margin-bottom: 20px;
+      animation: pulse-gold 3s ease-in-out infinite;
     }
-
     .header h1 {
       font-family: 'Noto Serif JP', serif;
-      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-size: clamp(1.8rem, 6vw, 2.6rem);
       font-weight: 700;
-      line-height: 1.4;
-      background: linear-gradient(135deg, #C8B0FF, #82B1FF, #E8E4F0);
+      line-height: 1.35;
+      background: linear-gradient(135deg, var(--gold) 0%, #FFF9C4 40%, #C8B0FF 70%, var(--gold) 100%);
+      background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 10px;
+      animation: shimmer 4s linear infinite;
+      margin-bottom: 14px;
     }
-
     .header p {
       color: var(--text-sub);
-      font-size: 0.9rem;
-      line-height: 1.7;
+      font-size: 0.92rem;
+      line-height: 1.8;
+    }
+    .header-stars {
+      color: var(--gold);
+      font-size: 1.1rem;
+      letter-spacing: 0.3em;
+      margin-bottom: 14px;
+      opacity: 0.8;
     }
 
-    /* 入力カード */
+    /* ========== 入力カード ========== */
     .input-card {
       background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 32px 28px;
-      margin-bottom: 24px;
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 24px;
+      padding: 36px 28px;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,215,0,0.08);
     }
-
     .input-card h2 {
       font-family: 'Noto Serif JP', serif;
       font-size: 1rem;
       font-weight: 400;
       color: var(--text-sub);
       text-align: center;
-      margin-bottom: 24px;
-      letter-spacing: 0.08em;
+      margin-bottom: 28px;
+      letter-spacing: 0.1em;
     }
 
     .date-row {
@@ -124,152 +171,144 @@
       align-items: center;
       justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
-
     .date-group {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
     }
-
     .date-group label {
-      font-size: 0.72rem;
-      color: var(--text-sub);
-      letter-spacing: 0.1em;
+      font-size: 0.7rem;
+      color: var(--gold);
+      letter-spacing: 0.15em;
     }
-
     .date-sep {
-      font-size: 1.2rem;
-      color: var(--text-sub);
-      margin-top: 18px;
+      font-size: 1.3rem;
+      color: rgba(255,215,0,0.35);
+      margin-top: 20px;
       flex-shrink: 0;
     }
 
     select {
       background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 12px;
       color: var(--text-main);
       font-family: 'Noto Sans JP', sans-serif;
       font-size: 0.95rem;
-      padding: 10px 8px;
+      padding: 11px 8px;
       cursor: pointer;
       appearance: none;
       -webkit-appearance: none;
       text-align: center;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-
     select:focus {
-      border-color: rgba(155, 150, 184, 0.5);
+      border-color: rgba(255,215,0,0.5);
+      box-shadow: 0 0 12px rgba(255,215,0,0.15);
     }
-
-    #sel-year  { width: 90px; }
-    #sel-month { width: 64px; }
-    #sel-day   { width: 64px; }
+    #sel-year  { width: 92px; }
+    #sel-month { width: 66px; }
+    #sel-day   { width: 66px; }
 
     .btn-diagnose {
       display: block;
       width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #4A148C, #1A237E);
-      border: 1px solid rgba(155, 150, 184, 0.3);
-      border-radius: 14px;
-      color: #E8E4F0;
+      padding: 18px;
+      background: linear-gradient(135deg, #7B5C00, #B8860B, #FFD700, #B8860B, #7B5C00);
+      background-size: 200% auto;
+      border: none;
+      border-radius: 16px;
+      color: #0A0A1A;
       font-family: 'Noto Sans JP', sans-serif;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.3s;
       position: relative;
       overflow: hidden;
+      animation: shimmer 3s linear infinite;
+      box-shadow: 0 4px 24px rgba(255,215,0,0.35);
     }
-
-    .btn-diagnose::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
-      opacity: 0;
-      transition: opacity 0.25s;
-    }
-
     .btn-diagnose:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(74, 20, 140, 0.5);
+      box-shadow: 0 8px 40px rgba(255,215,0,0.55);
     }
-
-    .btn-diagnose:hover::before { opacity: 1; }
     .btn-diagnose:active { transform: translateY(0); }
 
-    /* 結果カード */
+    /* ========== 結果カード ========== */
     .result-card {
       display: none;
       background: var(--bg-card);
-      border-radius: 20px;
-      padding: 36px 28px;
-      margin-bottom: 24px;
-      animation: fadeSlideUp 0.5s ease forwards;
-      border: 1px solid transparent;
-      transition: border-color 0.4s;
+      border-radius: 24px;
+      padding: 40px 28px;
+      margin-bottom: 28px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 40px rgba(0,0,0,0.5);
     }
-
-    .result-card.visible { display: block; }
-
-    .result-card.color-red    { border-color: rgba(229, 57, 53, 0.4); }
-    .result-card.color-white  { border-color: rgba(220, 215, 235, 0.4); }
-    .result-card.color-blue   { border-color: rgba(30, 136, 229, 0.4); }
-    .result-card.color-yellow { border-color: rgba(253, 216, 53, 0.4); }
-
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .result-card.visible {
+      display: block;
+      animation: fadeSlideUp 0.6s ease forwards;
     }
+    .result-card.color-red    { border-color: rgba(240, 80, 80, 0.45); box-shadow: 0 4px 60px rgba(240,80,80,0.12); }
+    .result-card.color-white  { border-color: rgba(216, 208, 240, 0.45); box-shadow: 0 4px 60px rgba(216,208,240,0.1); }
+    .result-card.color-blue   { border-color: rgba(79, 195, 247, 0.45); box-shadow: 0 4px 60px rgba(79,195,247,0.12); }
+    .result-card.color-yellow { border-color: rgba(255, 215, 64, 0.45); box-shadow: 0 4px 60px rgba(255,215,64,0.12); }
 
-    /* KIN番号 */
+    /* ========== KIN番号 ========== */
     .kin-display {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 12px;
     }
-
     .kin-label {
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      color: var(--text-sub);
-      margin-bottom: 8px;
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      margin-bottom: 10px;
     }
-
     .kin-number {
       font-family: 'Noto Serif JP', serif;
-      font-size: clamp(4.5rem, 20vw, 7rem);
+      font-size: clamp(5rem, 22vw, 8rem);
       font-weight: 700;
       line-height: 1;
-      transition: color 0.4s, text-shadow 0.4s;
+      animation: kinReveal 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .kin-number.glow-red    { color: var(--red-main);    text-shadow: 0 0 25px var(--red-glow),    0 0 80px rgba(240,80,80,0.25); }
+    .kin-number.glow-white  { color: var(--white-main);  text-shadow: 0 0 25px var(--white-glow),  0 0 80px rgba(216,208,240,0.2); }
+    .kin-number.glow-blue   { color: var(--blue-main);   text-shadow: 0 0 25px var(--blue-glow),   0 0 80px rgba(79,195,247,0.25); }
+    .kin-number.glow-yellow { color: var(--yellow-main); text-shadow: 0 0 25px var(--yellow-glow), 0 0 80px rgba(255,215,64,0.25); }
+
+    .kin-sub {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      letter-spacing: 0.1em;
+      margin-top: 6px;
     }
 
-    /* KINグロー */
-    .kin-number.glow-red {
-      color: var(--red-main);
-      text-shadow: 0 0 20px var(--red-glow), 0 0 60px var(--red-glow), 0 0 120px rgba(229,57,53,0.2);
+    /* ========== 区切り線 ========== */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0;
     }
-    .kin-number.glow-white {
-      color: var(--white-main);
-      text-shadow: 0 0 20px var(--white-glow), 0 0 60px var(--white-glow), 0 0 120px rgba(220,215,235,0.2);
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
     }
-    .kin-number.glow-blue {
-      color: var(--blue-main);
-      text-shadow: 0 0 20px var(--blue-glow), 0 0 60px var(--blue-glow), 0 0 120px rgba(30,136,229,0.2);
-    }
-    .kin-number.glow-yellow {
-      color: var(--yellow-main);
-      text-shadow: 0 0 20px var(--yellow-glow), 0 0 60px var(--yellow-glow), 0 0 120px rgba(253,216,53,0.2);
+    .divider-text {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      white-space: nowrap;
     }
 
-    /* 紋章・音セクション */
+    /* ========== バッジ行 ========== */
     .badge-row {
       display: flex;
       gap: 12px;
@@ -277,217 +316,284 @@
       margin-bottom: 28px;
       flex-wrap: wrap;
     }
-
     .badge-item {
       background: var(--bg-panel);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 20px;
+      border-radius: 16px;
+      padding: 16px 20px;
       text-align: center;
       flex: 1;
-      min-width: 130px;
+      min-width: 140px;
       max-width: 220px;
     }
-
     .badge-item .badge-label {
-      font-size: 0.68rem;
-      letter-spacing: 0.15em;
-      color: var(--text-sub);
-      margin-bottom: 6px;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      margin-bottom: 8px;
     }
-
     .badge-item .badge-value {
       font-family: 'Noto Serif JP', serif;
       font-size: 1.05rem;
       font-weight: 700;
-      margin-bottom: 4px;
-      transition: color 0.4s;
+      margin-bottom: 5px;
     }
-
     .badge-item .badge-sub {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-sub);
     }
 
-    /* 色クラス */
     .text-red    { color: var(--red-main); }
     .text-white  { color: var(--white-main); }
     .text-blue   { color: var(--blue-main); }
     .text-yellow { color: var(--yellow-main); }
 
-    /* 説明テキスト */
-    .desc-box {
-      background: var(--bg-panel);
-      border-left: 3px solid;
-      border-radius: 0 12px 12px 0;
-      padding: 18px 20px;
-      margin-bottom: 28px;
-      transition: border-color 0.4s;
-    }
-
-    .desc-box.border-red    { border-color: var(--red-main); }
-    .desc-box.border-white  { border-color: var(--white-main); }
-    .desc-box.border-blue   { border-color: var(--blue-main); }
-    .desc-box.border-yellow { border-color: var(--yellow-main); }
-
-    .desc-box p {
-      font-size: 0.88rem;
-      line-height: 1.8;
-      color: var(--text-main);
-    }
-
-    /* キーワードタグ */
+    /* ========== キーワードタグ ========== */
     .keyword-row {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 28px;
     }
-
     .keyword-tag {
-      padding: 5px 14px;
+      padding: 5px 16px;
       border-radius: 20px;
       font-size: 0.75rem;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       border: 1px solid;
-      transition: all 0.4s;
     }
+    .keyword-tag.tag-red    { color: var(--red-main);    border-color: rgba(240,80,80,0.4);    background: rgba(240,80,80,0.08); }
+    .keyword-tag.tag-white  { color: var(--white-main);  border-color: rgba(216,208,240,0.4);  background: rgba(216,208,240,0.08); }
+    .keyword-tag.tag-blue   { color: var(--blue-main);   border-color: rgba(79,195,247,0.4);   background: rgba(79,195,247,0.08); }
+    .keyword-tag.tag-yellow { color: var(--yellow-main); border-color: rgba(255,215,64,0.4);   background: rgba(255,215,64,0.08); }
 
-    .keyword-tag.tag-red    { color: var(--red-main);    border-color: rgba(229,57,53,0.4);    background: rgba(229,57,53,0.08); }
-    .keyword-tag.tag-white  { color: var(--white-main);  border-color: rgba(220,215,235,0.4);  background: rgba(220,215,235,0.08); }
-    .keyword-tag.tag-blue   { color: var(--blue-main);   border-color: rgba(30,136,229,0.4);   background: rgba(30,136,229,0.08); }
-    .keyword-tag.tag-yellow { color: var(--yellow-main); border-color: rgba(253,216,53,0.4);   background: rgba(253,216,53,0.08); }
-
-    /* CTA */
-    .cta-block {
-      background: linear-gradient(135deg, rgba(74, 20, 140, 0.4), rgba(13, 71, 161, 0.4));
-      border: 1px solid rgba(155, 150, 184, 0.25);
+    /* ========== セクションブロック ========== */
+    .section-block {
+      background: var(--bg-panel);
       border-radius: 16px;
-      padding: 28px 24px;
-      text-align: center;
-      margin-bottom: 20px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      border-left: 3px solid;
     }
+    .section-block.border-red    { border-color: var(--red-main); }
+    .section-block.border-white  { border-color: var(--white-main); }
+    .section-block.border-blue   { border-color: var(--blue-main); }
+    .section-block.border-yellow { border-color: var(--yellow-main); }
 
-    .cta-block .cta-title {
-      font-family: 'Noto Serif JP', serif;
-      font-size: 1.05rem;
-      font-weight: 700;
+    .section-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
       margin-bottom: 10px;
     }
-
-    .cta-block .cta-desc {
-      font-size: 0.84rem;
-      color: var(--text-sub);
-      line-height: 1.7;
-      margin-bottom: 20px;
+    .section-body {
+      font-size: 0.88rem;
+      line-height: 1.85;
+      color: var(--text-main);
     }
 
+    /* ========== 職業タグ ========== */
+    .jobs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .job-tag {
+      padding: 5px 14px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.25);
+      color: var(--gold);
+    }
+
+    /* ========== 相性カード ========== */
+    .compat-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .compat-item {
+      flex: 1;
+      min-width: 90px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .compat-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    /* ========== ラッキーカラー ========== */
+    .lucky-color-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .lucky-color-swatch {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.15);
+      box-shadow: 0 0 16px var(--swatch-glow, rgba(255,255,255,0.3));
+    }
+    .lucky-color-text {
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+
+    /* ========== 今日のメッセージ ========== */
+    .today-block {
+      background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,215,0,0.03));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .today-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .today-body {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: var(--text-main);
+    }
+
+    /* ========== CTA ========== */
+    .cta-block {
+      background: linear-gradient(135deg, rgba(100, 30, 180, 0.4), rgba(20, 80, 180, 0.4));
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      animation: borderGlow 3s ease-in-out infinite;
+    }
+    .cta-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--gold);
+    }
+    .cta-desc {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      line-height: 1.8;
+      margin-bottom: 22px;
+    }
     .btn-dm {
       display: inline-block;
-      padding: 14px 32px;
-      background: linear-gradient(135deg, #6A1B9A, #283593);
-      border: 1px solid rgba(155,150,184,0.3);
+      padding: 15px 36px;
+      background: linear-gradient(135deg, #7B5C00, #B8860B, #FFD700, #B8860B, #7B5C00);
+      background-size: 200% auto;
       border-radius: 50px;
-      color: #E8E4F0;
+      color: #0A0A1A;
       font-family: 'Noto Sans JP', sans-serif;
       font-size: 0.95rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-decoration: none;
       transition: all 0.25s;
-      cursor: pointer;
+      animation: shimmer 3s linear infinite;
+      box-shadow: 0 4px 24px rgba(255,215,0,0.35);
     }
-
     .btn-dm:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(106, 27, 154, 0.5);
+      box-shadow: 0 8px 40px rgba(255,215,0,0.55);
     }
 
-    /* フォロー誘導 */
+    /* ========== フォロー ========== */
     .follow-block {
       text-align: center;
-      padding: 20px;
+      padding: 24px;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       margin-bottom: 40px;
     }
-
-    .follow-block .follow-text {
+    .follow-text {
       font-size: 0.85rem;
       color: var(--text-sub);
-      line-height: 1.7;
-      margin-bottom: 14px;
+      line-height: 1.75;
+      margin-bottom: 16px;
     }
-
     .btn-follow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 28px;
-      background: linear-gradient(135deg, #4A148C, #1A237E);
-      border: none;
+      padding: 13px 30px;
+      background: linear-gradient(135deg, #5B2C8B, #1E3A7E);
+      border: 1px solid rgba(255,215,0,0.2);
       border-radius: 50px;
-      color: #E8E4F0;
+      color: var(--text-main);
       font-family: 'Noto Sans JP', sans-serif;
       font-size: 0.9rem;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.07em;
       text-decoration: none;
       transition: all 0.25s;
     }
-
     .btn-follow:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(74, 20, 140, 0.5);
+      box-shadow: 0 6px 24px rgba(91,44,139,0.5);
     }
-
     .ig-icon {
-      width: 20px;
-      height: 20px;
-      fill: none;
-      stroke: #E8E4F0;
-      stroke-width: 1.8;
+      width: 20px; height: 20px;
+      fill: none; stroke: var(--text-main); stroke-width: 1.8;
     }
 
-    /* フッター */
+    /* ========== フッター ========== */
     .footer {
       text-align: center;
       color: var(--text-sub);
-      font-size: 0.72rem;
-      opacity: 0.6;
+      font-size: 0.7rem;
+      opacity: 0.5;
       letter-spacing: 0.08em;
     }
 
-    /* エラーメッセージ */
+    /* ========== エラー ========== */
     .error-msg {
       display: none;
       color: #EF5350;
       font-size: 0.82rem;
       text-align: center;
-      margin-top: 12px;
+      margin-top: 14px;
     }
-
     .error-msg.visible { display: block; }
 
-    /* レスポンシブ */
+    /* ========== レスポンシブ ========== */
     @media (max-width: 400px) {
-      .input-card { padding: 24px 18px; }
-      .result-card { padding: 28px 18px; }
+      .container { padding: 36px 16px 100px; }
+      .input-card { padding: 28px 18px; }
+      .result-card { padding: 32px 18px; }
       .date-row { gap: 6px; }
-      #sel-year { width: 82px; }
+      #sel-year { width: 84px; }
+      .section-block { padding: 18px 16px; }
     }
   </style>
 </head>
 <body>
+<canvas id="starfield"></canvas>
+
 <div class="container">
 
   <!-- ヘッダー -->
   <header class="header">
     <div class="header-badge">マヤ暦 ドリームスペル</div>
+    <div class="header-stars">★ ★ ★</div>
     <h1>無料KIN診断</h1>
-    <p>あなたの生年月日から<br>
-    宇宙が示す使命を読み解く</p>
+    <p>あなたの生年月日から<br>宇宙が示す使命・性格・運命を読み解く</p>
   </header>
 
   <!-- 入力カード -->
@@ -509,7 +615,7 @@
         <select id="sel-day"></select>
       </div>
     </div>
-    <button class="btn-diagnose" onclick="diagnose()">今すぐ診断する</button>
+    <button class="btn-diagnose" onclick="diagnose()">運命を診断する</button>
     <div class="error-msg" id="error-msg">生年月日を正しく選択してください。</div>
   </div>
 
@@ -518,8 +624,15 @@
 
     <!-- KIN番号 -->
     <div class="kin-display">
-      <div class="kin-label">あなたのKIN番号</div>
+      <div class="kin-label">あなたの運命の数</div>
       <div class="kin-number" id="kin-number">--</div>
+      <div class="kin-sub" id="kin-wavespell"></div>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-text">あなたのマヤ暦鑑定結果</div>
+      <div class="divider-line"></div>
     </div>
 
     <!-- 紋章・音バッジ -->
@@ -539,35 +652,87 @@
     <!-- キーワードタグ -->
     <div class="keyword-row" id="keyword-row"></div>
 
-    <!-- 説明文 -->
-    <div class="desc-box" id="desc-box">
-      <p id="desc-text"></p>
+    <!-- 本質 -->
+    <div class="section-block" id="section-personality">
+      <div class="section-title">あなたの本質</div>
+      <div class="section-body" id="text-personality"></div>
+    </div>
+
+    <!-- 使命 -->
+    <div class="section-block" id="section-mission">
+      <div class="section-title">あなたの使命</div>
+      <div class="section-body" id="text-mission"></div>
+    </div>
+
+    <!-- 向いている仕事 -->
+    <div class="section-block" id="section-jobs">
+      <div class="section-title">向いている仕事</div>
+      <div class="jobs-row" id="jobs-row"></div>
+    </div>
+
+    <!-- 恋愛傾向 -->
+    <div class="section-block" id="section-love">
+      <div class="section-title">恋愛傾向</div>
+      <div class="section-body" id="text-love"></div>
+    </div>
+
+    <!-- 相性 -->
+    <div class="section-block" id="section-compat">
+      <div class="section-title">相性最強の紋章</div>
+      <div class="compat-row" id="compat-row"></div>
+    </div>
+
+    <!-- 2026年運気 -->
+    <div class="section-block" id="section-fortune">
+      <div class="section-title">2026年の運気</div>
+      <div class="section-body" id="text-fortune"></div>
+    </div>
+
+    <!-- ラッキーカラー -->
+    <div class="section-block" id="section-lucky">
+      <div class="section-title">ラッキーカラー</div>
+      <div class="lucky-color-row">
+        <div class="lucky-color-swatch" id="lucky-swatch"></div>
+        <div class="lucky-color-text" id="text-lucky"></div>
+      </div>
+    </div>
+
+    <!-- 今日のメッセージ -->
+    <div class="today-block">
+      <div class="today-title">今日の宇宙からのメッセージ</div>
+      <div class="today-body" id="text-today"></div>
+    </div>
+
+    <!-- 注意点 -->
+    <div class="section-block" id="section-caution">
+      <div class="section-title">気をつけること</div>
+      <div class="section-body" id="text-caution"></div>
     </div>
 
     <!-- CTA -->
     <div class="cta-block">
-      <div class="cta-title">もっと深く知りたいですか？</div>
+      <div class="cta-title">もっと詳しく知りたい方へ</div>
       <div class="cta-desc">
-        紋章が持つ深層の意味・人生テーマ・<br>
-        相性のいいKIN番号・今年の流れを<br>
+        紋章が持つ深層の意味・パートナーとの相性・<br>
+        転機の時期・今世の魂のテーマを<br>
         個別に鑑定しています。
       </div>
       <a class="btn-dm" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">
-        詳しい鑑定はDMで
+        DMで「鑑定希望」と送る
       </a>
     </div>
 
-    <!-- フォロー誘導 -->
+    <!-- フォロー -->
     <div class="follow-block">
       <div class="follow-text">
         毎日のKINエネルギー・星読みを<br>
-        Instagramで発信しています。
+        インスタグラムで発信しています。
       </div>
       <a class="btn-follow" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">
         <svg class="ig-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
           <circle cx="12" cy="12" r="4.5"/>
-          <circle cx="17.5" cy="6.5" r="1" fill="#E8E4F0"/>
+          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
         </svg>
         @kinuranai をフォロー
       </a>
@@ -583,146 +748,464 @@
 
 <script>
 // =====================================================================
-// Maya Calendar KIN Calculator (JS port of maya_kin_calculator.py)
+// 星空アニメーション
+// =====================================================================
+(function() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    const count = Math.floor((W * H) / 5000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.4 + 0.2,
+        alpha: Math.random(),
+        speed: Math.random() * 0.008 + 0.003,
+        phase: Math.random() * Math.PI * 2,
+        gold: Math.random() < 0.12,
+      });
+    }
+  }
+
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    stars.forEach(s => {
+      const a = 0.15 + 0.85 * (0.5 + 0.5 * Math.sin(s.phase + t * s.speed));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      if (s.gold) {
+        ctx.fillStyle = `rgba(255,215,0,${a * 0.9})`;
+      } else {
+        ctx.fillStyle = `rgba(200,190,255,${a * 0.7})`;
+      }
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize();
+  initStars();
+  requestAnimationFrame(draw);
+})();
+
+// =====================================================================
+// マヤ暦KIN計算
 // Anchor: 1972/3/4 = KIN 135  |  Dreamspell - Feb29 does NOT advance KIN
 // =====================================================================
-
 const ANCHOR = { year: 1972, month: 3, day: 4 };
 const ANCHOR_KIN = 135;
 
 function isLeapYear(y) {
   return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
 }
-
 function daysBetween(d1, d2) {
-  // Returns d2 - d1 in days (can be negative)
   return Math.round((d2 - d1) / 86400000);
 }
-
 function countLeapDaysBetween(d1, d2) {
-  // Count Feb 29 leap days strictly: d1 < leap_day <= d2
   if (d2 <= d1) return 0;
   const start = d1 < d2 ? d1 : d2;
   const end   = d1 < d2 ? d2 : d1;
   let count = 0;
   for (let y = start.getFullYear(); y <= end.getFullYear(); y++) {
     if (!isLeapYear(y)) continue;
-    const leapDay = new Date(y, 1, 29); // Feb 29
+    const leapDay = new Date(y, 1, 29);
     if (leapDay > start && leapDay <= end) count++;
   }
   return count;
 }
-
 function calculateKin(year, month, day) {
   const anchor = new Date(ANCHOR.year, ANCHOR.month - 1, ANCHOR.day);
   const target = new Date(year, month - 1, day);
-
   const rawDelta = daysBetween(anchor, target);
-  let leapOffset;
-  if (rawDelta >= 0) {
-    leapOffset = countLeapDaysBetween(anchor, target);
-  } else {
-    leapOffset = -countLeapDaysBetween(target, anchor);
-  }
-
+  let leapOffset = rawDelta >= 0
+    ? countLeapDaysBetween(anchor, target)
+    : -countLeapDaysBetween(target, anchor);
   const adjusted = rawDelta - leapOffset;
   const kin = ((ANCHOR_KIN - 1 + adjusted) % 260 + 260) % 260 + 1;
   return kin;
 }
-
-function getEmblemNumber(kin) {
-  const n = kin % 20;
-  return n === 0 ? 20 : n;
-}
-
-function getToneNumber(kin) {
-  const n = kin % 13;
-  return n === 0 ? 13 : n;
-}
+function getEmblemNumber(kin) { const n = kin % 20; return n === 0 ? 20 : n; }
+function getToneNumber(kin)   { const n = kin % 13; return n === 0 ? 13 : n; }
+function getWavespell(kin)    { return Math.ceil(kin / 13); }
 
 // =====================================================================
-// 紋章データ (20種)
+// 20紋章データ（完全版）
 // =====================================================================
-const EMBLEMS = {
-  1:  { ja: "赤い龍",           color: "red",    keywords: ["母性", "愛情", "ゼロから生む"],
-        desc: "全てを包み込む愛のエネルギーを持つ存在。誰かのために尽くすことで自分も輝く。\n新しいものを生み出す創造力と、守り育てる母性が最大の才能。\n深い愛情で人々を繋ぐ、生命力あふれる紋章。" },
-
-  2:  { ja: "白い風",           color: "white",  keywords: ["感性", "共感", "メッセンジャー"],
-        desc: "宇宙からのメッセージを受け取り、言葉や音楽で届ける使命を持つ。\n鋭い感性と共感力で、見えない世界と現実を繋ぐ架け橋になる。\n表現することで世界に光をもたらす、感性豊かな紋章。" },
-
-  3:  { ja: "青い夜",           color: "blue",   keywords: ["夢", "目標", "直感"],
-        desc: "豊かさと夢が結びついた、直感と想像力に満ちた存在。\n内側に広大な宇宙を持ち、ありありとした夢を現実化する力がある。\n眠れる才能が花開く時、世界を変えるビジョンが生まれる紋章。" },
-
-  4:  { ja: "黄色い種",         color: "yellow", keywords: ["探求", "学習", "開花"],
-        desc: "知識と知恵を集め、最高の花を咲かせるための旅を続ける存在。\n好奇心旺盛で探求心が強く、あらゆる場所から学びを得る才能がある。\n蒔いた種が大きく実る時、周囲に豊かさをもたらす紋章。" },
-
-  5:  { ja: "赤い蛇",           color: "red",    keywords: ["情熱", "努力", "本能"],
-        desc: "生命力と情熱が全身にみなぎる、本能的な強さを持つ存在。\nひとつのことに集中するフォーカス力が並外れており、困難を乗り越える意志がある。\n脱皮を繰り返しながら進化し続ける、変容の紋章。" },
-
-  6:  { ja: "白い世界の橋渡し", color: "white",  keywords: ["平和", "おもてなし", "繋ぐ"],
-        desc: "異なる世界や人々の間に橋を架け、平和をもたらす使命を持つ。\n手放しと受容の循環の中で、絶妙なバランスを保つ才能がある。\n見えない世界と現実を繋ぐ、橋渡し役の紋章。" },
-
-  7:  { ja: "青い手",           color: "blue",   keywords: ["癒し", "奉仕", "達成"],
-        desc: "手から発せられる癒しのエネルギーで周囲を回復させる存在。\n目標達成への強い意志と、人のために行動する奉仕の精神を持つ。\n触れるものすべてに可能性をもたらす、完成の紋章。" },
-
-  8:  { ja: "黄色い星",         color: "yellow", keywords: ["美意識", "調和", "アート"],
-        desc: "宇宙の美しさと調和を体現する、アーティスティックな存在。\n洗練された美意識で周囲を彩り、優雅さを纏って生きる才能がある。\n星の輝きのように、存在するだけで世界を美しくする紋章。" },
-
-  9:  { ja: "赤い月",           color: "red",    keywords: ["信念", "改革", "浄化"],
-        desc: "流れのエネルギーを受け取り、世界を浄化する力を持つ存在。\n月のように満ち欠けしながらも、その信念の揺るぎなさで周囲を導く。\n感情の波を乗りこなし、変化の流れを作り出す紋章。" },
-
-  10: { ja: "白い犬",           color: "white",  keywords: ["忠誠心", "家族愛", "信頼"],
-        desc: "愛と忠誠心が溢れる、深い絆を育てる存在。\n家族や仲間を守ることへの献身と、どんな時も信頼できる誠実さがある。\n純粋な愛情で人の心を開き、絆を深める紋章。" },
-
-  11: { ja: "青い猿",           color: "blue",   keywords: ["アイデア", "ひらめき", "遊び"],
-        desc: "遊び心とひらめきで世界を驚かせる、発想豊かな存在。\nユーモアの中に深い知恵を隠し持ち、楽しみながら問題を解決する。\n魔法のような発想で人々を喜ばせる、創造の紋章。" },
-
-  12: { ja: "黄色い人",         color: "yellow", keywords: ["こだわり", "自由", "一芸"],
-        desc: "自由意志と個性を輝かせながら、己の道を突き進む存在。\n一つのことを極めるこだわりと、型にはまらない自由な発想を持つ。\n自分らしさを全開にして、豊かさを体現する紋章。" },
-
-  13: { ja: "赤い空歩く人",     color: "red",    keywords: ["奉仕", "指導", "探検"],
-        desc: "天と地を繋ぎ、新しい世界を探求する冒険者。\n高い視点で物事を俯瞰しながら、地に足のついた行動で夢を実現する。\n奉仕の精神を持ちながら、人々を新しい地平へ導く紋章。" },
-
-  14: { ja: "白い魔法使い",     color: "white",  keywords: ["誠実", "魅力", "受容"],
-        desc: "時間を超えた知恵と魅力で、現実を変容させる力を持つ存在。\n受容と誠実さで人々を惹きつけ、魔法のように状況を好転させる。\n純粋な心に宿る力で奇跡を起こす、魔法の紋章。" },
-
-  15: { ja: "青い鷲",           color: "blue",   keywords: ["先見性", "論理", "俯瞰"],
-        desc: "高い視点から全体を見渡し、未来を見通す先見の明を持つ存在。\n論理的思考と直感が融合し、誰も気づかないパターンを発見する才能がある。\n鷲の目で真実を見極め、創造的なビジョンを示す紋章。" },
-
-  16: { ja: "黄色い戦士",       color: "yellow", keywords: ["チャレンジ", "行動力", "勇気"],
-        desc: "勇気と行動力で困難に立ち向かう、戦士の魂を持つ存在。\n恐れを知りながらも前進し、知性と意志で道を切り開く力がある。\n問いを立て、答えを求めて進む知の戦士の紋章。" },
-
-  17: { ja: "赤い地球",         color: "red",    keywords: ["思いやり", "絆", "ナビゲーション"],
-        desc: "シンクロニシティを引き寄せ、宇宙のリズムと共鳴して生きる存在。\n思いやりと包容力で人々の心を繋ぎ、自然なナビゲーションで道を示す。\n地球のように全てを包み込む、共鳴の紋章。" },
-
-  18: { ja: "白い鏡",           color: "white",  keywords: ["自立心", "礼節", "真実"],
-        desc: "真実を映す鏡のように、世界の本質を見極める存在。\n自立心と礼節を持ちながら、無限の可能性をシンプルに反映する。\n内なる秩序と誠実さで、本物の美しさを示す紋章。" },
-
-  19: { ja: "青い嵐",           color: "blue",   keywords: ["集中力", "パワー", "変容"],
-        desc: "強大なエネルギーで変容と革新をもたらす、嵐のような存在。\n圧倒的な集中力と行動力で、旧来のものを壊し新しい世界を創り出す。\n変化の渦中にあっても揺るぎない、変容の紋章。" },
-
-  20: { ja: "黄色い太陽",       color: "yellow", keywords: ["明るさ", "責任感", "輝き"],
-        desc: "太陽のような輝きで周囲を照らし、全ての命に温もりを与える存在。\n高い責任感と使命感を持ち、明るさで人々に希望をもたらす。\n宇宙の光として全てを照らす、輝きの紋章。" },
+const SEALS = {
+  1: {
+    ja: "赤い龍", color: "red",
+    keywords: ["母性", "愛情", "創造"],
+    personality: "全ての命を守りたいという原初的な衝動を持つ。家族や仲間への愛情が深く、「自分がいなければ」という使命感が強い。完璧主義で、愛する人のためには徹夜も厭わない。新しいものを生み出す創造力と、守り育てる母性が最大の武器。あなたがいるだけで周囲は安心する。",
+    mission: "新しいものを生み出し、愛で包み込むこと。あなたの愛情は世界を変える力を持っている。",
+    jobs: ["教育者", "医療従事者", "保育士", "カウンセラー", "助産師"],
+    love: "一度好きになると深く深く愛する一途なタイプ。時に過保護になるが、それは愛情の深さの表れ。長期的な関係で本領を発揮し、相手の全てを包み込む愛で絆を深める。",
+    compatibility: [6, 11, 16],
+    compatibility_names: ["白い世界の橋渡し", "青い猿", "黄色い戦士"],
+    lucky_color: "コーラルレッド",
+    lucky_hex: "#F08080",
+    lucky_glow: "rgba(240,128,128,0.4)",
+    fortune_2026: "2026年は「生み出す年」。温めてきたアイデアや計画が一気に形になる時期。特に春から夏にかけて新しい出会いや仕事の依頼が舞い込む。自分を信じて動き出すことが開運のカギ。",
+    today_msg: "今日は誰かに「ありがとう」を伝えてみて。あなたの愛情は、言葉にすることでもっと輝く。",
+    caution: "自己犠牲のしすぎに注意。自分を満たすことが先。「ノー」と言う練習も大切な愛の形。"
+  },
+  2: {
+    ja: "白い風", color: "white",
+    keywords: ["感性", "共感", "メッセンジャー"],
+    personality: "宇宙からのメッセージを受け取り、言葉や音楽・アートで世界に届ける使命を持つ。鋭い感性と共感力で、見えない世界と現実を繋ぐ架け橋になる。表現することで世界に光をもたらす才能があり、あなたの言葉は人の心に深く刺さる。",
+    mission: "受け取ったインスピレーションを形にして世界に届けること。沈黙の中にも力がある。",
+    jobs: ["作家", "ミュージシャン", "声優", "スピリチュアル講師", "カウンセラー"],
+    love: "感受性が豊かで、相手の気持ちを言葉より先に察知するタイプ。言葉で愛を表現するのが得意で、ロマンチックな関係を築く。傷つきやすい一面もあるが、それが深い共感力の源。",
+    compatibility: [7, 12, 17],
+    compatibility_names: ["青い手", "黄色い人", "赤い地球"],
+    lucky_color: "パールホワイト",
+    lucky_hex: "#EDE8F8",
+    lucky_glow: "rgba(216,208,240,0.4)",
+    fortune_2026: "2026年は「言葉が武器になる年」。ブログ・SNS・講座など表現活動で評価される。インスピレーションを即アウトプットすることで運気が上昇。コミュニケーションが人生を動かす。",
+    today_msg: "今日は静かな場所でひとり、心の声に耳を傾けて。答えはもう自分の中にある。",
+    caution: "周囲の感情に引きずられすぎないこと。自分の軸を持つことで本来の力が発揮できる。"
+  },
+  3: {
+    ja: "青い夜", color: "blue",
+    keywords: ["夢", "直感", "豊かさ"],
+    personality: "豊かさと夢が結びついた、直感と想像力に満ちた存在。内側に広大な宇宙を持ち、ありありとした夢を現実化する力がある。一見おとなしく見えるが、内面には誰も想像しないほど壮大なビジョンが広がっている。",
+    mission: "眠れる才能と豊かさを世界に解放すること。夢を語ることで周囲を照らす。",
+    jobs: ["起業家", "クリエイター", "投資家", "研究者", "夢分析士"],
+    love: "夢を一緒に語り合える相手に深く惹かれる。現実よりも精神的な繋がりを重視。ロマンチストで理想が高いが、理解し合えた時の絆は誰よりも深い。",
+    compatibility: [8, 13, 18],
+    compatibility_names: ["黄色い星", "赤い空歩く人", "白い鏡"],
+    lucky_color: "ミッドナイトブルー",
+    lucky_hex: "#191970",
+    lucky_glow: "rgba(79,195,247,0.4)",
+    fortune_2026: "2026年は「夢が現実になる年」。長年温めてきた計画が動き出す。金運も上昇傾向で、思い切った投資や新事業が吉。直感を信じて行動することで大きな豊かさが訪れる。",
+    today_msg: "今日、あなたの夢を紙に書き出して。言語化した夢は宇宙に届く注文書になる。",
+    caution: "現実逃避に注意。夢を追いながらも地に足をつけた行動が運を開く。"
+  },
+  4: {
+    ja: "黄色い種", color: "yellow",
+    keywords: ["探求", "学習", "開花"],
+    personality: "知識と知恵を集め、最高の花を咲かせるための旅を続ける存在。好奇心旺盛で探求心が強く、あらゆる場所から学びを得る才能がある。あなたの成長は止まることなく、積み上げた知識が人々の道標になる。",
+    mission: "学び続け、その知識で周囲に豊かさをもたらすこと。蒔いた種は必ず実る。",
+    jobs: ["研究者", "教師", "編集者", "コンサルタント", "薬剤師"],
+    love: "知的な会話ができる相手に惹かれる。一緒に成長できるパートナーシップを求める。感情より知性で繋がるタイプ。焦らずじっくり関係を深めるのが長続きの秘訣。",
+    compatibility: [9, 14, 19],
+    compatibility_names: ["赤い月", "白い魔法使い", "青い嵐"],
+    lucky_color: "フォレストグリーン",
+    lucky_hex: "#228B22",
+    lucky_glow: "rgba(34,139,34,0.4)",
+    fortune_2026: "2026年は「開花の年」。これまでの努力と学びが一気に花開く。資格取得・出版・登壇など、知識を外に発信する活動が吉。春から秋にかけて評価が急上昇する時期。",
+    today_msg: "今日は気になることをひとつ深く調べてみて。その先に新しい扉が開いている。",
+    caution: "完璧主義になりすぎず、「まず始める」を心がけて。学び続けながら行動することが大切。"
+  },
+  5: {
+    ja: "赤い蛇", color: "red",
+    keywords: ["情熱", "本能", "生命力"],
+    personality: "生命力と情熱が全身にみなぎる、本能的な強さを持つ存在。ひとつのことへの集中力が並外れており、困難を乗り越える揺るぎない意志がある。脱皮を繰り返しながら進化し続け、本能で正解を掴み取る力がある。",
+    mission: "本能的な知恵で生き抜き、生命力の使い方を世界に示すこと。",
+    jobs: ["アスリート", "経営者", "外科医", "治療師", "格闘家"],
+    love: "情熱的で一度好きになると燃え上がる。肉体的・感情的な繋がりを深く求める。嫉妬深い面もあるが、それは愛情の裏返し。浅い関係よりも全力の深い愛を求める。",
+    compatibility: [10, 15, 20],
+    compatibility_names: ["白い犬", "青い鷲", "黄色い太陽"],
+    lucky_color: "ディープレッド",
+    lucky_hex: "#8B0000",
+    lucky_glow: "rgba(139,0,0,0.5)",
+    fortune_2026: "2026年は「情熱が報われる年」。体を動かすことで運気が上昇。健康管理に気をつけながら、全力で挑んだことが大きな成果を生む。夏場は特にエネルギーが高まる。",
+    today_msg: "今日は体を動かして。ウォーキングでも筋トレでも、身体の中から活力が湧いてくる。",
+    caution: "衝動的な言動に注意。情熱を正しい方向に向けることで、その力が倍増する。"
+  },
+  6: {
+    ja: "白い世界の橋渡し", color: "white",
+    keywords: ["平和", "繋ぐ", "手放し"],
+    personality: "異なる世界や人々の間に橋を架け、平和をもたらす使命を持つ。手放しと受容の循環の中で、絶妙なバランスを保つ才能がある。あなたがいると争いが収まり、対立する人同士が自然と和解していく不思議な力がある。",
+    mission: "分断されたものを繋ぎ、世界に平和と循環をもたらすこと。",
+    jobs: ["外交官", "通訳", "仲介業", "医師", "ソーシャルワーカー"],
+    love: "穏やかで争いを好まない。愛においても平和主義。相手を受け入れる深い包容力があるが、自分の気持ちを抑えすぎないよう注意。お互いを尊重し合える関係が理想。",
+    compatibility: [1, 11, 16],
+    compatibility_names: ["赤い龍", "青い猿", "黄色い戦士"],
+    lucky_color: "スカイブルー",
+    lucky_hex: "#87CEEB",
+    lucky_glow: "rgba(135,206,235,0.4)",
+    fortune_2026: "2026年は「繋がりが財産になる年」。人脈が広がり、思わぬところから大きなチャンスが訪れる。執着を手放すほど豊かさが流れ込む。仲介・コーディネーター的な役割が評価される。",
+    today_msg: "今日は誰かの「橋渡し」をしてみて。あなたの一言が誰かの人生を変えるかもしれない。",
+    caution: "自分を犠牲にして平和を保とうとしないこと。あなた自身が幸せでいることが一番大切。"
+  },
+  7: {
+    ja: "青い手", color: "blue",
+    keywords: ["癒し", "達成", "奉仕"],
+    personality: "手から発せられる癒しのエネルギーで周囲を回復させる存在。目標達成への強い意志と、人のために行動する奉仕の精神を持つ。触れるものすべてに可能性をもたらし、何かを「完成させる」天才的な力がある。",
+    mission: "癒しと奉仕の力で、周囲の人の可能性を最大限に引き出すこと。",
+    jobs: ["セラピスト", "鍼灸師", "整体師", "外科医", "プロジェクトマネージャー"],
+    love: "相手を癒し、支えることに喜びを感じる。尽くすタイプだが、尽くしすぎて消耗することも。相手から感謝される関係が長続きの秘訣。手を繋いだ瞬間の温かさが特別な意味を持つ。",
+    compatibility: [2, 12, 17],
+    compatibility_names: ["白い風", "黄色い人", "赤い地球"],
+    lucky_color: "ターコイズ",
+    lucky_hex: "#40E0D0",
+    lucky_glow: "rgba(64,224,208,0.4)",
+    fortune_2026: "2026年は「完成の年」。長年かけて積み上げてきたものが形になる。資格・プロジェクト・人間関係、全てが完結に向かう。特に秋以降は達成感に満ちた出来事が続く。",
+    today_msg: "今日、手を使う作業に集中してみて。料理・手紙・クラフト。手の動きがあなたに気づきをくれる。",
+    caution: "完璧主義になりすぎず、「完成させる」ことを優先して。完璧でなくても動かすことが大切。"
+  },
+  8: {
+    ja: "黄色い星", color: "yellow",
+    keywords: ["美意識", "調和", "アート"],
+    personality: "宇宙の美しさと調和を体現する、アーティスティックな存在。洗練された美意識で周囲を彩り、優雅さを纏って生きる才能がある。星の輝きのように、存在するだけで世界を美しくする力を持つ。審美眼は天下一品。",
+    mission: "美しさと調和を世界に広め、人々の心に星の光を灯すこと。",
+    jobs: ["デザイナー", "アーティスト", "インテリアコーディネーター", "美容師", "写真家"],
+    love: "美しい関係を求め、所作や品格にこだわる。見た目だけでなく、内面の美しさに惹かれる。感情を直接表現するより、環境や雰囲気で愛を伝えることが多い。芸術を共に楽しめる相手が理想。",
+    compatibility: [3, 13, 18],
+    compatibility_names: ["青い夜", "赤い空歩く人", "白い鏡"],
+    lucky_color: "ゴールド",
+    lucky_hex: "#FFD700",
+    lucky_glow: "rgba(255,215,0,0.5)",
+    fortune_2026: "2026年は「美が開運を呼ぶ年」。見た目・環境・人間関係の美化が運気を高める。クリエイティブな活動で評価が上がり、思いがけない才能が開花する。インスタグラムなどビジュアルSNSが吉。",
+    today_msg: "今日、部屋に花を一輪飾って。美しい環境があなたの才能をさらに輝かせる。",
+    caution: "完璧主義から来る批判癖に注意。美しさは多様。自分と他者の美しさを両方認めることが大切。"
+  },
+  9: {
+    ja: "赤い月", color: "red",
+    keywords: ["浄化", "改革", "流れ"],
+    personality: "流れのエネルギーを受け取り、世界を浄化する力を持つ存在。月のように満ち欠けしながらも、その信念の揺るぎなさで周囲を導く。感情の波を乗りこなし、変化の流れを自ら作り出す先駆者的な存在。",
+    mission: "古いものを浄化し、新しい流れを生み出して時代を変えること。",
+    jobs: ["改革者", "活動家", "ジャーナリスト", "精神科医", "ヒーラー"],
+    love: "感情が豊かで月のように変化する愛情を持つ。相手の変化も受け入れ、共に成長することを望む。直感的に縁を感じた人との出会いを大切に。感情を流すことで愛が深まる。",
+    compatibility: [4, 14, 19],
+    compatibility_names: ["黄色い種", "白い魔法使い", "青い嵐"],
+    lucky_color: "シルバー",
+    lucky_hex: "#C0C0C0",
+    lucky_glow: "rgba(192,192,192,0.4)",
+    fortune_2026: "2026年は「流れに乗る年」。抵抗せず、宇宙の流れに委ねることで大きな変化が訪れる。特に水に関わる活動（温泉・海・雨の日の活動）が吉。感情のデトックスが運気を一変させる。",
+    today_msg: "今日はネガティブな感情を日記に書き出して、手放してみて。流すことが次への扉を開く。",
+    caution: "感情の波に飲み込まれないよう注意。感じながらも俯瞰する視点を持つことが大切。"
+  },
+  10: {
+    ja: "白い犬", color: "white",
+    keywords: ["忠誠心", "愛", "信頼"],
+    personality: "愛と忠誠心が溢れる、深い絆を育てる存在。家族や仲間を守ることへの献身と、どんな時も信頼できる誠実さがある。純粋な愛情で人の心を開き、信頼関係を築くことが人生最大の喜び。あなたの誠実さは一生ものの財産。",
+    mission: "純粋な愛と誠実さで、周囲との深い絆を育み、信頼の輪を広げること。",
+    jobs: ["社会福祉士", "獣医師", "教師", "人事担当", "コーチ"],
+    love: "一途で深い愛情を持つ。パートナーへの忠誠心は絶対。言葉より行動で愛を示す。たまに依存度が高くなりすぎることがあるが、それは愛情の証。信頼できる関係こそが全て。",
+    compatibility: [5, 15, 20],
+    compatibility_names: ["赤い蛇", "青い鷲", "黄色い太陽"],
+    lucky_color: "アイボリー",
+    lucky_hex: "#FFFFF0",
+    lucky_glow: "rgba(216,208,240,0.4)",
+    fortune_2026: "2026年は「絆が深まる年」。長年の友人や家族との関係が一段と深まる。信頼関係から生まれるビジネスチャンスも多い。誠実に行動し続けることで、大きな信頼を獲得できる年。",
+    today_msg: "今日、大切な人にシンプルに「ありがとう」を伝えて。その一言があなたの運を動かす。",
+    caution: "期待しすぎると傷つくことも。相手に求めすぎず、まず自分を愛することが愛を引き寄せる。"
+  },
+  11: {
+    ja: "青い猿", color: "blue",
+    keywords: ["遊び心", "ひらめき", "創造"],
+    personality: "遊び心とひらめきで世界を驚かせる、発想豊かな存在。ユーモアの中に深い知恵を隠し持ち、楽しみながら問題を解決する。魔法のような発想で人々を喜ばせ、遊びが仕事になる稀有な才能を持っている。",
+    mission: "遊びと創造性で世界に喜びをもたらし、人々の心を子どもに戻すこと。",
+    jobs: ["エンターテイナー", "ゲームデザイナー", "コメディアン", "玩具デザイナー", "イベントプランナー"],
+    love: "恋愛も遊びの延長線上にある。楽しい時間を共有できる相手に惹かれる。重くなりすぎず、軽やかに愛を育む。時に子どもっぽさが出るが、それが愛すべき魅力。",
+    compatibility: [1, 6, 16],
+    compatibility_names: ["赤い龍", "白い世界の橋渡し", "黄色い戦士"],
+    lucky_color: "コバルトブルー",
+    lucky_hex: "#0047AB",
+    lucky_glow: "rgba(79,195,247,0.45)",
+    fortune_2026: "2026年は「遊びが収入になる年」。趣味や遊びの延長線上に大きなビジネスチャンスが潜む。楽しいと感じることに素直に従うことで、思わぬ幸運が舞い込む。SNSやエンタメ系の活動が吉。",
+    today_msg: "今日は子どもの頃好きだったことをしてみて。その中にあなたの隠れた才能が眠っている。",
+    caution: "飽きっぽさを自覚して。才能を継続させることが最大の課題。ひとつのことを6ヶ月続けると人生が変わる。"
+  },
+  12: {
+    ja: "黄色い人", color: "yellow",
+    keywords: ["自由", "こだわり", "一芸"],
+    personality: "自由意志と個性を輝かせながら、己の道を突き進む存在。一つのことを極めるこだわりと、型にはまらない自由な発想を持つ。自分らしさを全開にして生きることで豊かさを体現する、真の自由人。",
+    mission: "自分の道を自分で切り開き、自由であることで周囲に勇気を与えること。",
+    jobs: ["フリーランサー", "起業家", "哲学者", "芸術家", "冒険家"],
+    love: "自由を最も大切にするため、縛る相手とは相性が悪い。お互いの個性を尊重し合える対等な関係が理想。距離感を大切にすることで、逆に深い絆が生まれる。",
+    compatibility: [2, 7, 17],
+    compatibility_names: ["白い風", "青い手", "赤い地球"],
+    lucky_color: "アンバー",
+    lucky_hex: "#FFBF00",
+    lucky_glow: "rgba(255,191,0,0.45)",
+    fortune_2026: "2026年は「独立の年」。会社や組織に縛られない働き方への転換が吉。副業・フリーランス・起業など、自分の力で稼ぐ仕組みを作ることで大きな自由と豊かさを手に入れる。",
+    today_msg: "今日、自分の「こうしたい」という気持ちに素直に従って。人の目を気にしない一日を過ごして。",
+    caution: "頑固になりすぎず、柔軟性も持って。自分の信念は大切に、でも他者の意見も人生の栄養になる。"
+  },
+  13: {
+    ja: "赤い空歩く人", color: "red",
+    keywords: ["探検", "奉仕", "天地の橋渡し"],
+    personality: "天と地を繋ぎ、新しい世界を探求する冒険者。高い視点で物事を俯瞰しながら、地に足のついた行動で夢を実現する。奉仕の精神を持ちながら、人々を新しい地平へと導く先駆者的存在。",
+    mission: "既知の限界を超え、新しい地平を切り開いて人々に可能性を示すこと。",
+    jobs: ["旅行家", "冒険家", "スポーツ選手", "宇宙飛行士", "精神的指導者"],
+    love: "冒険心旺盛で、非日常的な体験を共に楽しめる相手に惹かれる。旅や探検を一緒にする中で絆が深まる。自由を愛しながらも、信頼できるパートナーへの愛情は深い。",
+    compatibility: [3, 8, 18],
+    compatibility_names: ["青い夜", "黄色い星", "白い鏡"],
+    lucky_color: "サンセットオレンジ",
+    lucky_hex: "#FF6E40",
+    lucky_glow: "rgba(255,110,64,0.4)",
+    fortune_2026: "2026年は「新天地への年」。引っ越し・転職・海外移住など、新しい場所への移動が大きな運を呼ぶ。旅先での出会いが人生を変える可能性がある。行動範囲を広げることが開運の鍵。",
+    today_msg: "今日、いつもと違う道を歩いてみて。小さな探検が大きな発見につながる。",
+    caution: "放浪癖が強くなりすぎないよう注意。根を張ることも同じくらい大切な冒険。"
+  },
+  14: {
+    ja: "白い魔法使い", color: "white",
+    keywords: ["魅力", "受容", "変容"],
+    personality: "時間を超えた知恵と圧倒的な魅力で、現実を変容させる力を持つ存在。受容と誠実さで人々を惹きつけ、魔法のように状況を好転させる。あなたのそばにいるだけで不思議と物事がうまく回り始める、正真正銘の「運を持ってくる人」。",
+    mission: "純粋な心の力で奇跡を起こし、周囲の可能性を魔法のように解放すること。",
+    jobs: ["ヒーラー", "セラピスト", "俳優", "占い師", "コーチ"],
+    love: "言葉にしなくてもなぜか相手の心を掴む不思議な魅力がある。深い愛情と受容力で相手を包み込む。魔法のような雰囲気が異性を惹きつけるため、モテる傾向がある。",
+    compatibility: [4, 9, 19],
+    compatibility_names: ["黄色い種", "赤い月", "青い嵐"],
+    lucky_color: "アメジスト",
+    lucky_hex: "#9966CC",
+    lucky_glow: "rgba(153,102,204,0.45)",
+    fortune_2026: "2026年は「魔法が使える年」。強く意図を持つことで現実が動く。願望実現の力が最も高まる年。スピリチュアルな活動・瞑想・ヒーリング系の仕事が発展する。",
+    today_msg: "今日、願いを声に出して言ってみて。あなたの言葉には現実を変える魔法の力がある。",
+    caution: "他者への影響力が強いため、言葉には責任を持って。無意識の魔法が人を傷つけることもある。"
+  },
+  15: {
+    ja: "青い鷲", color: "blue",
+    keywords: ["先見性", "俯瞰", "論理"],
+    personality: "高い視点から全体を見渡し、未来を見通す先見の明を持つ存在。論理的思考と直感が融合し、誰も気づかないパターンを発見する才能がある。鷲の目で真実を見極め、創造的なビジョンを世界に示す才人。",
+    mission: "高い視点から真実を見極め、世界が向かうべき方向を示すこと。",
+    jobs: ["戦略家", "アナリスト", "映像作家", "建築家", "経営者"],
+    love: "感情より頭で恋愛を考えがち。相手の全てを見通そうとするため、最初は壁を感じさせることもある。でも一度心を開いた相手への愛情は深く、長続きする。知的な相手が理想。",
+    compatibility: [5, 10, 20],
+    compatibility_names: ["赤い蛇", "白い犬", "黄色い太陽"],
+    lucky_color: "インディゴ",
+    lucky_hex: "#4B0082",
+    lucky_glow: "rgba(79,195,247,0.4)",
+    fortune_2026: "2026年は「先見の力が評価される年」。あなたが以前から言っていたことが現実になり、周囲からの信頼が一気に高まる。長期的な投資・計画が結実する年。視野を広げるほど運気が上昇。",
+    today_msg: "今日、5年後の自分を具体的にイメージして。鷲の目で自分の未来を俯瞰してみて。",
+    caution: "頭でっかちになりすぎないよう注意。最終的には心で動くことが大切な局面もある。"
+  },
+  16: {
+    ja: "黄色い戦士", color: "yellow",
+    keywords: ["勇気", "行動力", "知の探求"],
+    personality: "勇気と行動力で困難に立ち向かう、戦士の魂を持つ存在。恐れを知りながらも前進し、知性と意志で道を切り開く力がある。問いを立て、答えを求めて進む知の戦士。チャレンジするほど強くなる。",
+    mission: "恐れを乗り越える勇気を行動で示し、人々に「できる」という希望を与えること。",
+    jobs: ["起業家", "弁護士", "自衛官", "消防士", "スポーツ選手"],
+    love: "好きな人のためなら何でもする勇敢な愛を持つ。アプローチも積極的。時に押しが強すぎることがあるが、それは愛情の表れ。相手を守ること・支えることに喜びを感じる。",
+    compatibility: [1, 6, 11],
+    compatibility_names: ["赤い龍", "白い世界の橋渡し", "青い猿"],
+    lucky_color: "ゴールデンイエロー",
+    lucky_hex: "#FFC107",
+    lucky_glow: "rgba(255,193,7,0.45)",
+    fortune_2026: "2026年は「チャレンジが報われる年」。今まで躊躇していたことに踏み出すことで大きな成果が出る。怖いと思ったことにこそ挑戦して。恐れを超えた先に人生最大のチャンスが待っている。",
+    today_msg: "今日、ひとつだけ「怖いけどやってみたいこと」に踏み出して。それがあなたの運命を動かす。",
+    caution: "戦いすぎて消耗しないよう注意。勇気は適切な休息から生まれる。休むことも戦略の一つ。"
+  },
+  17: {
+    ja: "赤い地球", color: "red",
+    keywords: ["シンクロ", "絆", "共鳴"],
+    personality: "シンクロニシティを引き寄せ、宇宙のリズムと共鳴して生きる存在。思いやりと包容力で人々の心を繋ぎ、自然なナビゲーションで道を示す。偶然の一致が多く、「引き寄せ力」が際立って高い人。",
+    mission: "宇宙のリズムと同期し、人々を正しい方向へナビゲートすること。",
+    jobs: ["ガイド", "環境活動家", "地域コーディネーター", "ヨガインストラクター", "農家"],
+    love: "縁を大切にし、出会いに深い意味を見出す。「この人と会うべくして会った」という感覚を大切にする。大地のような安定した愛情で相手を支える。",
+    compatibility: [2, 7, 12],
+    compatibility_names: ["白い風", "青い手", "黄色い人"],
+    lucky_color: "アースブラウン",
+    lucky_hex: "#8B4513",
+    lucky_glow: "rgba(240,80,80,0.35)",
+    fortune_2026: "2026年は「シンクロの年」。偶然の出来事に全て意味があると考えて行動することで、大きなチャンスを掴める。自然の中で過ごす時間が運気を高める。土に触れる活動が吉。",
+    today_msg: "今日起きた偶然に注目して。シンクロサインを見逃さないで。宇宙からのメッセージが隠れている。",
+    caution: "周囲に流されすぎないよう注意。シンクロを感じながらも自分の軸を保つことが大切。"
+  },
+  18: {
+    ja: "白い鏡", color: "white",
+    keywords: ["真実", "自立", "礼節"],
+    personality: "真実を映す鏡のように、世界の本質を見極める存在。自立心と礼節を持ちながら、無限の可能性をシンプルに反映する。内なる秩序と誠実さで、本物の美しさと真実を示す。あなた自身が世界の鏡になる。",
+    mission: "真実をありのままに映し出し、人々が自分の本当の姿を見られるよう手伝うこと。",
+    jobs: ["コーチ", "哲学者", "鑑定士", "審判", "人事評価者"],
+    love: "相手の本質を見抜く力があるため、表面的な関係には興味がない。深い内面での繋がりを求める。愛する相手に対しては完全に誠実で、嘘をつけない。",
+    compatibility: [3, 8, 13],
+    compatibility_names: ["青い夜", "黄色い星", "赤い空歩く人"],
+    lucky_color: "クリスタルシルバー",
+    lucky_hex: "#E8E4F0",
+    lucky_glow: "rgba(216,208,240,0.5)",
+    fortune_2026: "2026年は「本物が輝く年」。偽りのない誠実な行動が大きな信頼を生む。自己分析・内省の時間が運気を高める。本当の自分と向き合うほど、外側の世界が整っていく。",
+    today_msg: "今日、鏡の前で自分の目を見て。その瞳の奥に答えが映っている。",
+    caution: "批判的になりすぎないよう注意。真実を伝える時は愛を込めて。厳しさは愛情の別の顔であるべき。"
+  },
+  19: {
+    ja: "青い嵐", color: "blue",
+    keywords: ["変容", "パワー", "集中力"],
+    personality: "強大なエネルギーで変容と革新をもたらす、嵐のような存在。圧倒的な集中力と行動力で、旧来のものを壊し新しい世界を創り出す。変化の渦中にあっても揺るぎない強さを持つ。あなたが動けば時代が動く。",
+    mission: "強烈なエネルギーで古い構造を壊し、より良い新しい世界を創造すること。",
+    jobs: ["革命家", "スタートアップ経営者", "外科医", "格闘家", "改革者"],
+    love: "情熱的で激しい愛情を持つ。好きになると嵐のように追いかける。恋愛にも全力投球で、相手を圧倒することがある。落ち着いた後に示す深い愛情が本物。",
+    compatibility: [4, 9, 14],
+    compatibility_names: ["黄色い種", "赤い月", "白い魔法使い"],
+    lucky_color: "ストームグレー",
+    lucky_hex: "#708090",
+    lucky_glow: "rgba(79,195,247,0.4)",
+    fortune_2026: "2026年は「嵐が過ぎた後の快晴」。年初は混乱があるかもしれないが、その先に大きな変容と成功が待つ。恐れずに嵐に飛び込むことで、人生が一変するチャンスが掴める。",
+    today_msg: "今日、長年避けてきた問題にあえて向き合って。嵐の中にこそあなたの力が眠っている。",
+    caution: "破壊だけでなく、創造にもエネルギーを向けて。壊した後に何を作るかがあなたの真価を決める。"
+  },
+  20: {
+    ja: "黄色い太陽", color: "yellow",
+    keywords: ["輝き", "責任感", "温もり"],
+    personality: "太陽のような輝きで周囲を照らし、全ての命に温もりを与える存在。高い責任感と使命感を持ち、明るさで人々に希望をもたらす。宇宙の光として全てを照らす、まさに「生きているだけで価値がある」紋章。",
+    mission: "自分自身が輝き続けることで、周囲の全てを照らし温め続けること。",
+    jobs: ["リーダー", "経営者", "医師", "タレント", "スポーツ選手"],
+    love: "明るく開放的な愛情を持つ。相手を照らし励ます存在。自然と人が集まるため、選択肢は多い。愛した相手は全力で幸せにしようとする。",
+    compatibility: [5, 10, 15],
+    compatibility_names: ["赤い蛇", "白い犬", "青い鷲"],
+    lucky_color: "サンシャインイエロー",
+    lucky_hex: "#FFE135",
+    lucky_glow: "rgba(255,215,64,0.5)",
+    fortune_2026: "2026年は「最高の輝きの年」。あなたの才能と魅力が最大限に発揮される。リーダーシップを発揮する場面で評価が急上昇。太陽のように堂々と存在するだけで運が舞い込む。",
+    today_msg: "今日、笑顔で過ごして。あなたの笑顔は太陽と同じ。誰かの暗い日を照らしている。",
+    caution: "全ての責任を背負いすぎないよう注意。太陽も休む必要がある。自己管理が運気維持の鍵。"
+  }
 };
 
 // =====================================================================
-// 銀河の音データ (13種)
+// 13の音データ（完全版）
 // =====================================================================
 const TONES = {
-  1:  { ja: "音1 磁気",    keyword: "率直・信頼" },
-  2:  { ja: "音2 月",      keyword: "白黒思考・直感" },
-  3:  { ja: "音3 電気",    keyword: "素直・調整役" },
-  4:  { ja: "音4 自己存在",keyword: "探求心・職人" },
-  5:  { ja: "音5 倍音",    keyword: "責任感・影のリーダー" },
-  6:  { ja: "音6 律動",    keyword: "冷静・転機" },
-  7:  { ja: "音7 共鳴",    keyword: "第六感・神秘" },
-  8:  { ja: "音8 銀河",    keyword: "調和・母性愛" },
-  9:  { ja: "音9 太陽",    keyword: "集中力・拡張" },
-  10: { ja: "音10 惑星",   keyword: "プロデュース力" },
-  11: { ja: "音11 分光",   keyword: "破壊と再生" },
-  12: { ja: "音12 水晶",   keyword: "問題解決・共有" },
-  13: { ja: "音13 宇宙",   keyword: "変容・超越" },
+  1:  { ja: "音1 磁気",    keywords: "統合・率直・信頼",   role: "始める人",    desc: "裏表がない率直な人。チームの目的を示し、新しいプロジェクトを始動させる力を持つ。リーダーとして自然に信頼を集める。" },
+  2:  { ja: "音2 月",      keywords: "二極・直感・調整",   role: "挑戦する人",  desc: "物事を二面から見る能力がある。対極を認識することで真実に近づく。パートナーシップを大切にし、協力関係で力を発揮する。" },
+  3:  { ja: "音3 電気",    keywords: "活性化・素直・奉仕", role: "奉仕する人",  desc: "電気のように素早くエネルギーを伝える。チームを活性化し、人々をつなげる奉仕の心を持つ。行動力が武器。" },
+  4:  { ja: "音4 自己存在",keywords: "形作る・探求・職人", role: "定義する人",  desc: "形のないものを具体的な形にする才能がある。探求心と職人気質で、深くひとつのことを掘り下げる。完成度へのこだわりが強い。" },
+  5:  { ja: "音5 倍音",    keywords: "力・責任・影響力",   role: "力を与える人",desc: "中心に立ち、周囲に強い影響力を持つ。表には出ないが、実際は全てを動かしている影のリーダー。責任感が人一倍強い。" },
+  6:  { ja: "音6 律動",    keywords: "冷静・平等・転機",   role: "整理する人",  desc: "リズムと均衡の力。感情に流されない冷静さと、公平に物事を見る目を持つ。人生の転機を迎えやすく、その変化が大きな成長をもたらす。" },
+  7:  { ja: "音7 共鳴",    keywords: "神秘・第六感・調和", role: "触媒になる人",desc: "第六感が鋭く、見えない世界を感じ取る力がある。神秘的な雰囲気を持ち、周囲に不思議な影響を与える共鳴体。" },
+  8:  { ja: "音8 銀河",    keywords: "調和・統合・母性",   role: "調和する人",  desc: "個人と全体を調和させる天才。愛情深く、誰もが居心地よくいられる環境を作り出す。高い理想と現実の橋渡しができる。" },
+  9:  { ja: "音9 太陽",    keywords: "集中・拡張・完成",   role: "実現する人",  desc: "意図を持って現実を動かす力がある。集中力が抜群で、始めたことを必ず完成させる。エネルギーが太陽のように外に向かって拡張する。" },
+  10: { ja: "音10 惑星",   keywords: "完璧・プロデュース・実現", role: "完成させる人", desc: "卓越したプロデュース力を持つ。全体を見渡しながら最高の成果を生み出す。完璧主義だが、その基準の高さが周囲を引き上げる。" },
+  11: { ja: "音11 分光",   keywords: "解放・変革・突破",   role: "解放する人",  desc: "固定した構造を解体し、新しい可能性を解放する。破壊と再生の力を持ち、停滞した状況に突破口を開く革命家。" },
+  12: { ja: "音12 水晶",   keywords: "協力・分かち合い・解決", role: "共有する人", desc: "複雑な問題を解決し、知恵を周囲と分かち合う。協力関係の中で最大の力を発揮。コミュニティを作る才能がある。" },
+  13: { ja: "音13 宇宙",   keywords: "変容・超越・宇宙的", role: "昇華する人",  desc: "宇宙的な視野で物事を見る。一つのサイクルの完成と次の始まりを体現する存在。変容と超越の力で、周囲を新しい次元に引き上げる。" },
 };
+
+// =====================================================================
+// ウェイブスペル名
+// =====================================================================
+const WAVESPELL_NAMES = [
+  "", "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇",
+  "白い世界の橋渡し", "青い手", "黄色い星", "赤い月", "白い犬",
+  "青い猿", "黄色い人", "赤い空歩く人", "白い魔法使い", "青い鷲",
+  "黄色い戦士", "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
+];
+
+// =====================================================================
+// 2026年運気ロジック
+// =====================================================================
+function getYearFortune2026(seal, tone) {
+  return SEALS[seal].fortune_2026;
+}
+
+// =====================================================================
+// 今日のメッセージ（今日のKINとユーザーのKINの関係で変化）
+// =====================================================================
+function getTodayMessage(seal) {
+  return SEALS[seal].today_msg;
+}
 
 // =====================================================================
 // セレクトボックス初期化
@@ -732,17 +1215,14 @@ function initSelects() {
   const selMonth = document.getElementById('sel-month');
   const selDay   = document.getElementById('sel-day');
 
-  // 年: 1930〜2010
   for (let y = 2010; y >= 1930; y--) {
     const opt = document.createElement('option');
     opt.value = y;
     opt.textContent = y + '年';
     selYear.appendChild(opt);
   }
-  // デフォルト1990
   selYear.value = 1990;
 
-  // 月
   for (let m = 1; m <= 12; m++) {
     const opt = document.createElement('option');
     opt.value = m;
@@ -751,7 +1231,6 @@ function initSelects() {
   }
   selMonth.value = 7;
 
-  // 日
   for (let d = 1; d <= 31; d++) {
     const opt = document.createElement('option');
     opt.value = d;
@@ -769,7 +1248,6 @@ function diagnose() {
   const month = parseInt(document.getElementById('sel-month').value);
   const day   = parseInt(document.getElementById('sel-day').value);
 
-  // 日付バリデーション
   const errEl = document.getElementById('error-msg');
   try {
     const testDate = new Date(year, month - 1, day);
@@ -777,23 +1255,22 @@ function diagnose() {
       testDate.getFullYear() !== year ||
       testDate.getMonth() + 1 !== month ||
       testDate.getDate() !== day
-    ) {
-      throw new Error('invalid');
-    }
+    ) throw new Error('invalid');
   } catch(e) {
     errEl.classList.add('visible');
     return;
   }
   errEl.classList.remove('visible');
 
-  const kin = calculateKin(year, month, day);
+  const kin       = calculateKin(year, month, day);
   const emblemNum = getEmblemNumber(kin);
   const toneNum   = getToneNumber(kin);
-  const emblem    = EMBLEMS[emblemNum];
+  const seal      = SEALS[emblemNum];
   const tone      = TONES[toneNum];
-  const color     = emblem.color;
+  const color     = seal.color;
+  const wavespell = getWavespell(kin);
 
-  // 結果カードのクラスをリセット
+  // カード表示
   const card = document.getElementById('result-card');
   card.className = 'result-card visible color-' + color;
 
@@ -801,35 +1278,96 @@ function diagnose() {
   const kinEl = document.getElementById('kin-number');
   kinEl.textContent = kin;
   kinEl.className = 'kin-number glow-' + color;
+  document.getElementById('kin-wavespell').textContent =
+    '第' + wavespell + 'ウェイブスペル | ' + WAVESPELL_NAMES[((emblemNum - 1) % 20) + 1] + 'の旅';
 
   // 紋章
   const emblemNameEl = document.getElementById('emblem-name');
-  emblemNameEl.textContent = emblem.ja;
+  emblemNameEl.textContent = seal.ja;
   emblemNameEl.className = 'badge-value text-' + color;
-
-  document.getElementById('emblem-keyword').textContent = emblem.keywords.join('・');
+  document.getElementById('emblem-keyword').textContent = seal.keywords.join('・');
 
   // 音
   const toneNameEl = document.getElementById('tone-name');
   toneNameEl.textContent = tone.ja;
   toneNameEl.className = 'badge-value text-' + color;
-  document.getElementById('tone-keyword').textContent = tone.keyword;
+  document.getElementById('tone-keyword').textContent = tone.role + '｜' + tone.keywords;
 
   // キーワードタグ
   const kwRow = document.getElementById('keyword-row');
   kwRow.innerHTML = '';
-  emblem.keywords.forEach(kw => {
+  seal.keywords.forEach(kw => {
+    const tag = document.createElement('span');
+    tag.className = 'keyword-tag tag-' + color;
+    tag.textContent = kw;
+    kwRow.appendChild(tag);
+  });
+  // 音キーワードも追加
+  tone.keywords.split('・').forEach(kw => {
     const tag = document.createElement('span');
     tag.className = 'keyword-tag tag-' + color;
     tag.textContent = kw;
     kwRow.appendChild(tag);
   });
 
-  // 説明文
-  const descBox  = document.getElementById('desc-box');
-  descBox.className = 'desc-box border-' + color;
-  document.getElementById('desc-text').innerHTML =
-    emblem.desc.replace(/\n/g, '<br>');
+  // border色を全セクションに適用
+  document.querySelectorAll('.section-block').forEach(el => {
+    el.className = 'section-block border-' + color;
+  });
+
+  // 本質
+  document.getElementById('text-personality').innerHTML =
+    seal.personality.replace(/\n/g, '<br>') +
+    '<br><br><span style="font-size:0.82rem;color:var(--text-sub)">銀河の音からの補足：</span>' +
+    '<br><span style="font-size:0.85rem;color:var(--text-sub)">' + tone.desc + '</span>';
+
+  // 使命
+  document.getElementById('text-mission').textContent = seal.mission;
+
+  // 向いている仕事
+  const jobsRow = document.getElementById('jobs-row');
+  jobsRow.innerHTML = '';
+  seal.jobs.forEach(job => {
+    const tag = document.createElement('span');
+    tag.className = 'job-tag';
+    tag.textContent = job;
+    jobsRow.appendChild(tag);
+  });
+
+  // 恋愛
+  document.getElementById('text-love').textContent = seal.love;
+
+  // 相性
+  const compatRow = document.getElementById('compat-row');
+  compatRow.innerHTML = '';
+  seal.compatibility.forEach((compatSealNum, i) => {
+    const compatSeal = SEALS[compatSealNum];
+    const item = document.createElement('div');
+    item.className = 'compat-item';
+    item.innerHTML = `
+      <div class="compat-name text-${compatSeal.color}">${compatSeal.ja}</div>
+      <div style="font-size:0.68rem;color:var(--text-sub);">${compatSeal.keywords.join('・')}</div>
+    `;
+    compatRow.appendChild(item);
+  });
+
+  // 2026年運気
+  document.getElementById('text-fortune').textContent = getYearFortune2026(emblemNum, toneNum);
+
+  // ラッキーカラー
+  const swatch = document.getElementById('lucky-swatch');
+  swatch.style.backgroundColor = seal.lucky_hex;
+  swatch.style.setProperty('--swatch-glow', seal.lucky_glow);
+  swatch.style.boxShadow = `0 0 16px ${seal.lucky_glow}`;
+  document.getElementById('text-lucky').innerHTML =
+    '<strong style="color:' + seal.lucky_hex + '">' + seal.lucky_color + '</strong><br>' +
+    '<span style="font-size:0.8rem;color:var(--text-sub)">このカラーを身につけることで、あなたの本来のエネルギーが増幅されます。</span>';
+
+  // 今日のメッセージ
+  document.getElementById('text-today').textContent = getTodayMessage(emblemNum);
+
+  // 注意点
+  document.getElementById('text-caution').textContent = seal.caution;
 
   // スクロール
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
