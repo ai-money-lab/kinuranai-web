@@ -1,1382 +1,777 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>無料KIN診断 | マヤ暦であなたの使命を知る</title>
-  <meta name="description" content="生年月日を入れるだけで、マヤ暦のKIN番号・太陽の紋章・銀河の音・性格・使命・恋愛傾向・2026年運気が即わかる無料診断ツール。">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-dark:    #0A0A2E;
-      --bg-grad1:   #0D0A35;
-      --bg-grad2:   #140A3E;
-      --bg-card:    #13123A;
-      --bg-panel:   #0F0E32;
-      --text-main:  #EDE8F8;
-      --text-sub:   #9B96C0;
-      --border:     rgba(155, 150, 200, 0.18);
-      --gold:       #FFD700;
-      --gold-glow:  rgba(255, 215, 0, 0.5);
-      --gold-dim:   rgba(255, 215, 0, 0.15);
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>無料KIN診断 | マヤ暦であなたの使命を知る</title>
+<meta name="description" content="生年月日を入れるだけで、マヤ暦のKIN番号・太陽の紋章・銀河の音・性格・使命・恋愛傾向・相性が即わかる無料診断ツール。66人の有名人KINマッチ付き。">
+<meta property="og:title" content="無料KIN診断 | マヤ暦であなたの使命を知る">
+<meta property="og:description" content="260のKINからあなたの運命を読み解く。有名人マッチ・相性診断・シェアカード生成付き。">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&family=Noto+Serif+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0A2E;--bg2:#140A3E;--card:rgba(19,18,58,.92);--panel:#0F0E32;
+  --txt:#EDE8F8;--sub:#9B96C0;--border:rgba(155,150,200,.18);
+  --gold:#FFD700;--gold-g:rgba(255,215,0,.5);--gold-d:rgba(255,215,0,.15);
+  --red:#F05050;--white-c:#D8D0F0;--blue:#4FC3F7;--yellow:#FFD740;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(160deg,var(--bg),var(--bg2));color:var(--txt);font-family:'Noto Sans JP',sans-serif;min-height:100vh;overflow-x:hidden}
+#starfield{position:fixed;inset:0;pointer-events:none;z-index:0}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 15%,rgba(100,30,180,.22) 0%,transparent 55%),radial-gradient(ellipse at 85% 80%,rgba(20,80,180,.22) 0%,transparent 55%);pointer-events:none;z-index:0}
 
-      --red-main:    #F05050;
-      --red-glow:    rgba(240, 80, 80, 0.5);
-      --white-main:  #D8D0F0;
-      --white-glow:  rgba(216, 208, 240, 0.5);
-      --blue-main:   #4FC3F7;
-      --blue-glow:   rgba(79, 195, 247, 0.5);
-      --yellow-main: #FFD740;
-      --yellow-glow: rgba(255, 215, 64, 0.5);
-    }
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes kinReveal{0%{opacity:0;transform:scale(.5);filter:blur(12px)}60%{transform:scale(1.12);filter:blur(0)}100%{opacity:1;transform:scale(1)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes pulse{0%,100%{box-shadow:0 0 20px var(--gold-g)}50%{box-shadow:0 0 40px var(--gold-g),0 0 80px rgba(255,215,0,.2)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+.container{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 20px 100px}
 
-    body {
-      background: linear-gradient(160deg, var(--bg-dark) 0%, var(--bg-grad1) 40%, var(--bg-grad2) 100%);
-      color: var(--text-main);
-      font-family: 'Noto Sans JP', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+/* Today Banner */
+.today-banner{position:relative;z-index:1;text-align:center;padding:20px 16px 16px;background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,215,0,.03));border-bottom:1px solid rgba(255,215,0,.15)}
+.today-banner .tb-label{font-size:.65rem;letter-spacing:.25em;color:var(--gold);margin-bottom:6px}
+.today-banner .tb-kin{font-family:'Noto Serif JP',serif;font-size:1.1rem;font-weight:700;color:var(--txt);margin-bottom:4px}
+.today-banner .tb-msg{font-size:.78rem;color:var(--sub);line-height:1.6;max-width:500px;margin:0 auto}
 
-    /* ========== 星空キャンバス ========== */
-    #starfield {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
+/* Header */
+.header{text-align:center;padding:40px 0 32px}
+.header-badge{display:inline-block;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.06));border:1px solid rgba(255,215,0,.35);border-radius:20px;padding:6px 20px;font-size:.7rem;letter-spacing:.2em;color:var(--gold);margin-bottom:16px;animation:pulse 3s ease-in-out infinite}
+.header h1{font-family:'Noto Serif JP',serif;font-size:clamp(1.8rem,6vw,2.6rem);font-weight:900;line-height:1.35;background:linear-gradient(135deg,var(--gold),#FFF9C4 40%,#C8B0FF 70%,var(--gold));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s linear infinite;margin-bottom:12px}
+.header p{color:var(--sub);font-size:.9rem;line-height:1.8}
 
-    /* 星くず静的 */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 15% 15%, rgba(100, 30, 180, 0.22) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 80%, rgba(20, 80, 180, 0.22) 0%, transparent 55%),
-        radial-gradient(ellipse at 50% 50%, rgba(180, 30, 120, 0.08) 0%, transparent 60%);
-      pointer-events: none;
-      z-index: 0;
-    }
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--panel);border-radius:16px;padding:4px;border:1px solid var(--border)}
+.tab{flex:1;padding:14px 8px;background:none;border:none;border-radius:12px;color:var(--sub);font-family:'Noto Sans JP',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.05em}
+.tab.active{background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,215,0,.08));color:var(--gold);box-shadow:0 2px 12px rgba(255,215,0,.15)}
+.tab-content{display:none}.tab-content.active{display:block;animation:fadeUp .4s ease}
 
-    /* ゴールドパーティクル */
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.2; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.5); }
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
-      100% { transform: translateY(-120px) rotate(360deg); opacity: 0; }
-    }
-    @keyframes pulse-gold {
-      0%, 100% { box-shadow: 0 0 20px var(--gold-glow), 0 0 60px rgba(255,215,0,0.2); }
-      50% { box-shadow: 0 0 35px var(--gold-glow), 0 0 100px rgba(255,215,0,0.35); }
-    }
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes kinReveal {
-      0% { opacity: 0; transform: scale(0.5); filter: blur(12px); }
-      60% { transform: scale(1.12); filter: blur(0); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% center; }
-      100% { background-position: 200% center; }
-    }
-    @keyframes borderGlow {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
+/* Input Card */
+.input-card{background:var(--card);backdrop-filter:blur(20px);border:1px solid rgba(255,215,0,.2);border-radius:24px;padding:32px 24px;margin-bottom:24px;box-shadow:0 4px 40px rgba(0,0,0,.4)}
+.input-card h2{font-family:'Noto Serif JP',serif;font-size:.95rem;font-weight:400;color:var(--sub);text-align:center;margin-bottom:24px;letter-spacing:.1em}
+.input-label{font-size:.75rem;color:var(--gold);letter-spacing:.15em;margin-bottom:10px;text-align:center}
+.date-row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.date-group{display:flex;flex-direction:column;align-items:center;gap:6px}
+.date-group label{font-size:.68rem;color:var(--gold);letter-spacing:.15em}
+.date-sep{font-size:1.2rem;color:rgba(255,215,0,.3);margin-top:18px}
+select{background:var(--panel);border:1px solid rgba(255,215,0,.2);border-radius:12px;color:var(--txt);font-family:'Noto Sans JP',sans-serif;font-size:.9rem;padding:10px 8px;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:center;outline:none;transition:border-color .2s}
+select:focus{border-color:rgba(255,215,0,.5);box-shadow:0 0 12px rgba(255,215,0,.15)}
+.sel-y{width:88px}.sel-m{width:62px}.sel-d{width:62px}
 
-    /* ========== コンテナ ========== */
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 48px 20px 100px;
-    }
+.btn-primary{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#7B5C00,#B8860B,#FFD700,#B8860B,#7B5C00);background-size:200% auto;border:none;border-radius:16px;color:#0A0A1A;font-family:'Noto Sans JP',sans-serif;font-size:1rem;font-weight:900;letter-spacing:.12em;cursor:pointer;transition:all .3s;animation:shimmer 3s linear infinite;box-shadow:0 4px 24px rgba(255,215,0,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(255,215,0,.55)}
+.error-msg{display:none;color:#EF5350;font-size:.8rem;text-align:center;margin-top:12px}.error-msg.visible{display:block}
 
-    /* ========== ヘッダー ========== */
-    .header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .header-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,215,0,0.06));
-      border: 1px solid rgba(255,215,0,0.35);
-      border-radius: 20px;
-      padding: 6px 20px;
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      color: var(--gold);
-      margin-bottom: 20px;
-      animation: pulse-gold 3s ease-in-out infinite;
-    }
-    .header h1 {
-      font-family: 'Noto Serif JP', serif;
-      font-size: clamp(1.8rem, 6vw, 2.6rem);
-      font-weight: 700;
-      line-height: 1.35;
-      background: linear-gradient(135deg, var(--gold) 0%, #FFF9C4 40%, #C8B0FF 70%, var(--gold) 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: shimmer 4s linear infinite;
-      margin-bottom: 14px;
-    }
-    .header p {
-      color: var(--text-sub);
-      font-size: 0.92rem;
-      line-height: 1.8;
-    }
-    .header-stars {
-      color: var(--gold);
-      font-size: 1.1rem;
-      letter-spacing: 0.3em;
-      margin-bottom: 14px;
-      opacity: 0.8;
-    }
+/* Result Card */
+.result-card{display:none;background:var(--card);backdrop-filter:blur(20px);border-radius:24px;padding:36px 24px;margin-bottom:24px;border:1px solid var(--border);box-shadow:0 4px 40px rgba(0,0,0,.5)}
+.result-card.visible{display:block}
+.result-card.c-red{border-color:rgba(240,80,80,.4)}.result-card.c-white{border-color:rgba(216,208,240,.4)}.result-card.c-blue{border-color:rgba(79,195,247,.4)}.result-card.c-yellow{border-color:rgba(255,215,64,.4)}
 
-    /* ========== 入力カード ========== */
-    .input-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(255,215,0,0.2);
-      border-radius: 24px;
-      padding: 36px 28px;
-      margin-bottom: 28px;
-      box-shadow: 0 4px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,215,0,0.08);
-    }
-    .input-card h2 {
-      font-family: 'Noto Serif JP', serif;
-      font-size: 1rem;
-      font-weight: 400;
-      color: var(--text-sub);
-      text-align: center;
-      margin-bottom: 28px;
-      letter-spacing: 0.1em;
-    }
+/* KIN Display */
+.kin-display{text-align:center;margin-bottom:8px}
+.kin-label{font-size:.7rem;letter-spacing:.25em;color:var(--gold);margin-bottom:8px}
+.kin-number{font-family:'Noto Serif JP',serif;font-size:clamp(4.5rem,20vw,7.5rem);font-weight:900;line-height:1;animation:kinReveal .8s cubic-bezier(.34,1.56,.64,1) forwards}
+.kin-number.g-red{color:var(--red);text-shadow:0 0 25px rgba(240,80,80,.5)}.kin-number.g-white{color:var(--white-c);text-shadow:0 0 25px rgba(216,208,240,.5)}.kin-number.g-blue{color:var(--blue);text-shadow:0 0 25px rgba(79,195,247,.5)}.kin-number.g-yellow{color:var(--yellow);text-shadow:0 0 25px rgba(255,215,64,.5)}
+.kin-sub{font-size:.75rem;color:var(--sub);letter-spacing:.1em;margin-top:4px}
+.kin-archetype{font-family:'Noto Serif JP',serif;font-size:1.3rem;font-weight:700;text-align:center;margin:12px 0 4px}
+.kin-archetype-en{font-size:.72rem;letter-spacing:.2em;color:var(--sub);text-align:center;margin-bottom:16px}
+.t-red{color:var(--red)}.t-white{color:var(--white-c)}.t-blue{color:var(--blue)}.t-yellow{color:var(--yellow)}
 
-    .date-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 32px;
-    }
-    .date-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 7px;
-    }
-    .date-group label {
-      font-size: 0.7rem;
-      color: var(--gold);
-      letter-spacing: 0.15em;
-    }
-    .date-sep {
-      font-size: 1.3rem;
-      color: rgba(255,215,0,0.35);
-      margin-top: 20px;
-      flex-shrink: 0;
-    }
+/* Divider */
+.divider{display:flex;align-items:center;gap:12px;margin:24px 0}.divider-line{flex:1;height:1px;background:var(--border)}.divider-text{font-size:.65rem;letter-spacing:.2em;color:var(--gold);white-space:nowrap}
 
-    select {
-      background: var(--bg-panel);
-      border: 1px solid rgba(255,215,0,0.2);
-      border-radius: 12px;
-      color: var(--text-main);
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 0.95rem;
-      padding: 11px 8px;
-      cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-      text-align: center;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    select:focus {
-      border-color: rgba(255,215,0,0.5);
-      box-shadow: 0 0 12px rgba(255,215,0,0.15);
-    }
-    #sel-year  { width: 92px; }
-    #sel-month { width: 66px; }
-    #sel-day   { width: 66px; }
+/* Celebrity Match */
+.celeb-card{background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,215,0,.04));border:1px solid rgba(255,215,0,.3);border-radius:16px;padding:20px;margin-bottom:20px;text-align:center;animation:float 3s ease-in-out infinite}
+.celeb-label{font-size:.65rem;letter-spacing:.2em;color:var(--gold);margin-bottom:8px}
+.celeb-names{font-family:'Noto Serif JP',serif;font-size:1rem;font-weight:700;color:var(--txt);line-height:1.7}
+.celeb-field{font-size:.72rem;color:var(--sub);margin-top:4px}
 
-    .btn-diagnose {
-      display: block;
-      width: 100%;
-      padding: 18px;
-      background: linear-gradient(135deg, #7B5C00, #B8860B, #FFD700, #B8860B, #7B5C00);
-      background-size: 200% auto;
-      border: none;
-      border-radius: 16px;
-      color: #0A0A1A;
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      cursor: pointer;
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-      animation: shimmer 3s linear infinite;
-      box-shadow: 0 4px 24px rgba(255,215,0,0.35);
-    }
-    .btn-diagnose:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 40px rgba(255,215,0,0.55);
-    }
-    .btn-diagnose:active { transform: translateY(0); }
+/* Badge Row */
+.badge-row{display:flex;gap:10px;justify-content:center;margin-bottom:24px;flex-wrap:wrap}
+.badge-item{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px 16px;text-align:center;flex:1;min-width:130px;max-width:210px}
+.badge-label{font-size:.63rem;letter-spacing:.2em;color:var(--gold);margin-bottom:6px}
+.badge-value{font-family:'Noto Serif JP',serif;font-size:1rem;font-weight:700;margin-bottom:3px}
+.badge-sub{font-size:.68rem;color:var(--sub)}
 
-    /* ========== 結果カード ========== */
-    .result-card {
-      display: none;
-      background: var(--bg-card);
-      border-radius: 24px;
-      padding: 40px 28px;
-      margin-bottom: 28px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 40px rgba(0,0,0,0.5);
-    }
-    .result-card.visible {
-      display: block;
-      animation: fadeSlideUp 0.6s ease forwards;
-    }
-    .result-card.color-red    { border-color: rgba(240, 80, 80, 0.45); box-shadow: 0 4px 60px rgba(240,80,80,0.12); }
-    .result-card.color-white  { border-color: rgba(216, 208, 240, 0.45); box-shadow: 0 4px 60px rgba(216,208,240,0.1); }
-    .result-card.color-blue   { border-color: rgba(79, 195, 247, 0.45); box-shadow: 0 4px 60px rgba(79,195,247,0.12); }
-    .result-card.color-yellow { border-color: rgba(255, 215, 64, 0.45); box-shadow: 0 4px 60px rgba(255,215,64,0.12); }
+/* Keyword Tags */
+.kw-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px;justify-content:center}
+.kw-tag{padding:5px 14px;border-radius:20px;font-size:.73rem;letter-spacing:.05em;border:1px solid}
+.kw-tag.k-red{color:var(--red);border-color:rgba(240,80,80,.4);background:rgba(240,80,80,.08)}.kw-tag.k-white{color:var(--white-c);border-color:rgba(216,208,240,.4);background:rgba(216,208,240,.08)}.kw-tag.k-blue{color:var(--blue);border-color:rgba(79,195,247,.4);background:rgba(79,195,247,.08)}.kw-tag.k-yellow{color:var(--yellow);border-color:rgba(255,215,64,.4);background:rgba(255,215,64,.08)}
 
-    /* ========== KIN番号 ========== */
-    .kin-display {
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    .kin-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.25em;
-      color: var(--gold);
-      margin-bottom: 10px;
-    }
-    .kin-number {
-      font-family: 'Noto Serif JP', serif;
-      font-size: clamp(5rem, 22vw, 8rem);
-      font-weight: 700;
-      line-height: 1;
-      animation: kinReveal 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards;
-    }
-    .kin-number.glow-red    { color: var(--red-main);    text-shadow: 0 0 25px var(--red-glow),    0 0 80px rgba(240,80,80,0.25); }
-    .kin-number.glow-white  { color: var(--white-main);  text-shadow: 0 0 25px var(--white-glow),  0 0 80px rgba(216,208,240,0.2); }
-    .kin-number.glow-blue   { color: var(--blue-main);   text-shadow: 0 0 25px var(--blue-glow),   0 0 80px rgba(79,195,247,0.25); }
-    .kin-number.glow-yellow { color: var(--yellow-main); text-shadow: 0 0 25px var(--yellow-glow), 0 0 80px rgba(255,215,64,0.25); }
+/* Section Block */
+.sec{background:var(--panel);border-radius:16px;padding:18px 20px;margin-bottom:14px;border-left:3px solid;opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s}
+.sec.revealed{opacity:1;transform:translateY(0)}
+.sec.b-red{border-color:var(--red)}.sec.b-white{border-color:var(--white-c)}.sec.b-blue{border-color:var(--blue)}.sec.b-yellow{border-color:var(--yellow)}
+.sec-title{font-size:.65rem;letter-spacing:.25em;color:var(--gold);margin-bottom:8px}
+.sec-body{font-size:.86rem;line-height:1.85;color:var(--txt)}
 
-    .kin-sub {
-      font-size: 0.78rem;
-      color: var(--text-sub);
-      letter-spacing: 0.1em;
-      margin-top: 6px;
-    }
+/* Jobs */
+.jobs-row{display:flex;flex-wrap:wrap;gap:7px}
+.job-tag{padding:5px 13px;border-radius:8px;font-size:.76rem;background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.25);color:var(--gold)}
 
-    /* ========== 区切り線 ========== */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 28px 0;
-    }
-    .divider-line {
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-    .divider-text {
-      font-size: 0.68rem;
-      letter-spacing: 0.2em;
-      color: var(--gold);
-      white-space: nowrap;
-    }
+/* Compat Items */
+.compat-row{display:flex;gap:8px;flex-wrap:wrap}
+.compat-item{flex:1;min-width:85px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center}
+.compat-name{font-size:.76rem;font-weight:700;margin-bottom:3px}
 
-    /* ========== バッジ行 ========== */
-    .badge-row {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
-    .badge-item {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 20px;
-      text-align: center;
-      flex: 1;
-      min-width: 140px;
-      max-width: 220px;
-    }
-    .badge-item .badge-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      color: var(--gold);
-      margin-bottom: 8px;
-    }
-    .badge-item .badge-value {
-      font-family: 'Noto Serif JP', serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-    .badge-item .badge-sub {
-      font-size: 0.7rem;
-      color: var(--text-sub);
-    }
+/* Lucky Color */
+.lucky-row{display:flex;align-items:center;gap:14px}
+.lucky-swatch{width:42px;height:42px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.15)}
+.lucky-text{font-size:.86rem;line-height:1.7}
 
-    .text-red    { color: var(--red-main); }
-    .text-white  { color: var(--white-main); }
-    .text-blue   { color: var(--blue-main); }
-    .text-yellow { color: var(--yellow-main); }
+/* Today Block */
+.today-block{background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(255,215,0,.03));border:1px solid rgba(255,215,0,.3);border-radius:16px;padding:20px;margin-bottom:14px;text-align:center}
+.today-title{font-size:.65rem;letter-spacing:.25em;color:var(--gold);margin-bottom:10px}
+.today-body{font-family:'Noto Serif JP',serif;font-size:.92rem;line-height:1.9;color:var(--txt)}
 
-    /* ========== キーワードタグ ========== */
-    .keyword-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 28px;
-    }
-    .keyword-tag {
-      padding: 5px 16px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      letter-spacing: 0.06em;
-      border: 1px solid;
-    }
-    .keyword-tag.tag-red    { color: var(--red-main);    border-color: rgba(240,80,80,0.4);    background: rgba(240,80,80,0.08); }
-    .keyword-tag.tag-white  { color: var(--white-main);  border-color: rgba(216,208,240,0.4);  background: rgba(216,208,240,0.08); }
-    .keyword-tag.tag-blue   { color: var(--blue-main);   border-color: rgba(79,195,247,0.4);   background: rgba(79,195,247,0.08); }
-    .keyword-tag.tag-yellow { color: var(--yellow-main); border-color: rgba(255,215,64,0.4);   background: rgba(255,215,64,0.08); }
+/* Share Button */
+.share-area{text-align:center;margin:24px 0}
+.btn-share{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,215,0,.08));border:1px solid rgba(255,215,0,.35);border-radius:50px;color:var(--gold);font-family:'Noto Sans JP',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.08em}
+.btn-share:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,215,0,.3)}
 
-    /* ========== セクションブロック ========== */
-    .section-block {
-      background: var(--bg-panel);
-      border-radius: 16px;
-      padding: 20px 22px;
-      margin-bottom: 16px;
-      border-left: 3px solid;
-    }
-    .section-block.border-red    { border-color: var(--red-main); }
-    .section-block.border-white  { border-color: var(--white-main); }
-    .section-block.border-blue   { border-color: var(--blue-main); }
-    .section-block.border-yellow { border-color: var(--yellow-main); }
+/* CTA */
+.cta-block{background:linear-gradient(135deg,rgba(100,30,180,.4),rgba(20,80,180,.4));border:1px solid rgba(255,215,0,.25);border-radius:20px;padding:28px 22px;text-align:center;margin-bottom:20px}
+.cta-title{font-family:'Noto Serif JP',serif;font-size:1.05rem;font-weight:700;margin-bottom:10px;color:var(--gold)}
+.cta-desc{font-size:.82rem;color:var(--sub);line-height:1.8;margin-bottom:18px}
+.btn-ig{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:linear-gradient(135deg,#5B2C8B,#1E3A7E);border:1px solid rgba(255,215,0,.2);border-radius:50px;color:var(--txt);font-family:'Noto Sans JP',sans-serif;font-size:.88rem;font-weight:700;text-decoration:none;transition:all .25s}
+.btn-ig:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(91,44,139,.5)}
 
-    .section-title {
-      font-size: 0.68rem;
-      letter-spacing: 0.25em;
-      color: var(--gold);
-      margin-bottom: 10px;
-    }
-    .section-body {
-      font-size: 0.88rem;
-      line-height: 1.85;
-      color: var(--text-main);
-    }
+/* Compatibility Result */
+.compat-result{display:none}.compat-result.visible{display:block;animation:fadeUp .5s ease}
+.compat-pair{display:flex;gap:16px;justify-content:center;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap}
+.compat-person{text-align:center;flex:1;min-width:140px}
+.compat-person .cp-label{font-size:.65rem;letter-spacing:.2em;color:var(--gold);margin-bottom:6px}
+.compat-person .cp-kin{font-family:'Noto Serif JP',serif;font-size:2.5rem;font-weight:900;line-height:1}
+.compat-person .cp-seal{font-size:.88rem;font-weight:700;margin-top:4px}
+.compat-vs{font-family:'Noto Serif JP',serif;font-size:1.5rem;color:var(--gold);align-self:center;margin-top:20px}
+.rel-card{background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,215,0,.04));border:1px solid rgba(255,215,0,.3);border-radius:16px;padding:20px;margin-bottom:14px;text-align:center}
+.rel-type{font-family:'Noto Serif JP',serif;font-size:1.15rem;font-weight:700;color:var(--gold);margin-bottom:6px}
+.rel-feel{font-size:.88rem;color:var(--txt);margin-bottom:8px}
+.rel-desc{font-size:.82rem;color:var(--sub);line-height:1.8}
+.no-rel{text-align:center;padding:20px;color:var(--sub);font-size:.88rem;line-height:1.8}
 
-    /* ========== 職業タグ ========== */
-    .jobs-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .job-tag {
-      padding: 5px 14px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      background: rgba(255,215,0,0.1);
-      border: 1px solid rgba(255,215,0,0.25);
-      color: var(--gold);
-    }
+/* Share Modal */
+.share-modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:20px}
+.share-modal.open{display:flex}
+.share-inner{max-width:360px;width:100%;text-align:center}
+.share-inner canvas{width:100%;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.share-btns{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.btn-dl{padding:12px 24px;border-radius:50px;border:none;font-family:'Noto Sans JP',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-dl.gold{background:var(--gold);color:#0A0A1A}.btn-dl.ghost{background:none;border:1px solid var(--sub);color:var(--sub)}
+.btn-dl:hover{transform:translateY(-1px)}
 
-    /* ========== 相性カード ========== */
-    .compat-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .compat-item {
-      flex: 1;
-      min-width: 90px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 10px;
-      text-align: center;
-    }
-    .compat-name {
-      font-size: 0.78rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    /* ========== ラッキーカラー ========== */
-    .lucky-color-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .lucky-color-swatch {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      border: 2px solid rgba(255,255,255,0.15);
-      box-shadow: 0 0 16px var(--swatch-glow, rgba(255,255,255,0.3));
-    }
-    .lucky-color-text {
-      font-size: 0.88rem;
-      line-height: 1.7;
-    }
-
-    /* ========== 今日のメッセージ ========== */
-    .today-block {
-      background: linear-gradient(135deg, rgba(255,215,0,0.08), rgba(255,215,0,0.03));
-      border: 1px solid rgba(255,215,0,0.3);
-      border-radius: 16px;
-      padding: 22px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    .today-title {
-      font-size: 0.68rem;
-      letter-spacing: 0.25em;
-      color: var(--gold);
-      margin-bottom: 12px;
-    }
-    .today-body {
-      font-family: 'Noto Serif JP', serif;
-      font-size: 0.95rem;
-      line-height: 1.9;
-      color: var(--text-main);
-    }
-
-    /* ========== CTA ========== */
-    .cta-block {
-      background: linear-gradient(135deg, rgba(100, 30, 180, 0.4), rgba(20, 80, 180, 0.4));
-      border: 1px solid rgba(255,215,0,0.25);
-      border-radius: 20px;
-      padding: 32px 24px;
-      text-align: center;
-      margin-bottom: 20px;
-      animation: borderGlow 3s ease-in-out infinite;
-    }
-    .cta-title {
-      font-family: 'Noto Serif JP', serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: var(--gold);
-    }
-    .cta-desc {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      line-height: 1.8;
-      margin-bottom: 22px;
-    }
-    .btn-dm {
-      display: inline-block;
-      padding: 15px 36px;
-      background: linear-gradient(135deg, #7B5C00, #B8860B, #FFD700, #B8860B, #7B5C00);
-      background-size: 200% auto;
-      border-radius: 50px;
-      color: #0A0A1A;
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-decoration: none;
-      transition: all 0.25s;
-      animation: shimmer 3s linear infinite;
-      box-shadow: 0 4px 24px rgba(255,215,0,0.35);
-    }
-    .btn-dm:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 40px rgba(255,215,0,0.55);
-    }
-
-    /* ========== フォロー ========== */
-    .follow-block {
-      text-align: center;
-      padding: 24px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      margin-bottom: 40px;
-    }
-    .follow-text {
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      line-height: 1.75;
-      margin-bottom: 16px;
-    }
-    .btn-follow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 13px 30px;
-      background: linear-gradient(135deg, #5B2C8B, #1E3A7E);
-      border: 1px solid rgba(255,215,0,0.2);
-      border-radius: 50px;
-      color: var(--text-main);
-      font-family: 'Noto Sans JP', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.07em;
-      text-decoration: none;
-      transition: all 0.25s;
-    }
-    .btn-follow:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(91,44,139,0.5);
-    }
-    .ig-icon {
-      width: 20px; height: 20px;
-      fill: none; stroke: var(--text-main); stroke-width: 1.8;
-    }
-
-    /* ========== フッター ========== */
-    .footer {
-      text-align: center;
-      color: var(--text-sub);
-      font-size: 0.7rem;
-      opacity: 0.5;
-      letter-spacing: 0.08em;
-    }
-
-    /* ========== エラー ========== */
-    .error-msg {
-      display: none;
-      color: #EF5350;
-      font-size: 0.82rem;
-      text-align: center;
-      margin-top: 14px;
-    }
-    .error-msg.visible { display: block; }
-
-    /* ========== レスポンシブ ========== */
-    @media (max-width: 400px) {
-      .container { padding: 36px 16px 100px; }
-      .input-card { padding: 28px 18px; }
-      .result-card { padding: 32px 18px; }
-      .date-row { gap: 6px; }
-      #sel-year { width: 84px; }
-      .section-block { padding: 18px 16px; }
-    }
-  </style>
+.footer{text-align:center;color:var(--sub);font-size:.68rem;opacity:.5;letter-spacing:.08em;padding:20px 0}
+@media(max-width:400px){.container{padding:0 16px 100px}.input-card,.result-card{padding:28px 16px}.sec{padding:16px 14px}.date-row{gap:5px}.sel-y{width:82px}}
+</style>
 </head>
 <body>
 <canvas id="starfield"></canvas>
 
+<div class="today-banner" id="today-banner">
+  <div class="tb-label">TODAY'S KIN ENERGY</div>
+  <div class="tb-kin" id="tb-kin"></div>
+  <div class="tb-msg" id="tb-msg"></div>
+</div>
+
 <div class="container">
+<header class="header">
+  <div class="header-badge">MAYA DREAMSPELL</div>
+  <h1>無料KIN診断</h1>
+  <p>あなたの生年月日から<br>宇宙が示す使命・性格・運命を読み解く</p>
+</header>
 
-  <!-- ヘッダー -->
-  <header class="header">
-    <div class="header-badge">マヤ暦 ドリームスペル</div>
-    <div class="header-stars">★ ★ ★</div>
-    <h1>無料KIN診断</h1>
-    <p>あなたの生年月日から<br>宇宙が示す使命・性格・運命を読み解く</p>
-  </header>
+<nav class="tabs">
+  <button class="tab active" onclick="switchTab('personal')">個人診断</button>
+  <button class="tab" onclick="switchTab('compat')">相性診断</button>
+</nav>
 
-  <!-- 入力カード -->
+<!-- Personal -->
+<div id="tab-personal" class="tab-content active">
   <div class="input-card">
     <h2>生年月日を選んでください</h2>
     <div class="date-row">
-      <div class="date-group">
-        <label>年</label>
-        <select id="sel-year"></select>
-      </div>
+      <div class="date-group"><label>YEAR</label><select id="p-year" class="sel-y"></select></div>
       <span class="date-sep">/</span>
-      <div class="date-group">
-        <label>月</label>
-        <select id="sel-month"></select>
-      </div>
+      <div class="date-group"><label>MONTH</label><select id="p-month" class="sel-m"></select></div>
       <span class="date-sep">/</span>
-      <div class="date-group">
-        <label>日</label>
-        <select id="sel-day"></select>
-      </div>
+      <div class="date-group"><label>DAY</label><select id="p-day" class="sel-d"></select></div>
     </div>
-    <button class="btn-diagnose" onclick="diagnose()">運命を診断する</button>
-    <div class="error-msg" id="error-msg">生年月日を正しく選択してください。</div>
+    <button class="btn-primary" onclick="doPersonal()">運命を診断する</button>
+    <div class="error-msg" id="p-err">生年月日を正しく選択してください。</div>
   </div>
+  <div class="result-card" id="p-result"></div>
+</div>
 
-  <!-- 結果カード -->
-  <div class="result-card" id="result-card">
-
-    <!-- KIN番号 -->
-    <div class="kin-display">
-      <div class="kin-label">あなたの運命の数</div>
-      <div class="kin-number" id="kin-number">--</div>
-      <div class="kin-sub" id="kin-wavespell"></div>
+<!-- Compatibility -->
+<div id="tab-compat" class="tab-content">
+  <div class="input-card">
+    <h2>ふたりの運命の関係を診断</h2>
+    <div class="input-label">あなたの生年月日</div>
+    <div class="date-row">
+      <div class="date-group"><label>YEAR</label><select id="c1-year" class="sel-y"></select></div>
+      <span class="date-sep">/</span>
+      <div class="date-group"><label>MONTH</label><select id="c1-month" class="sel-m"></select></div>
+      <span class="date-sep">/</span>
+      <div class="date-group"><label>DAY</label><select id="c1-day" class="sel-d"></select></div>
     </div>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <div class="divider-text">あなたのマヤ暦鑑定結果</div>
-      <div class="divider-line"></div>
+    <div class="input-label" style="margin-top:8px">お相手の生年月日</div>
+    <div class="date-row">
+      <div class="date-group"><label>YEAR</label><select id="c2-year" class="sel-y"></select></div>
+      <span class="date-sep">/</span>
+      <div class="date-group"><label>MONTH</label><select id="c2-month" class="sel-m"></select></div>
+      <span class="date-sep">/</span>
+      <div class="date-group"><label>DAY</label><select id="c2-day" class="sel-d"></select></div>
     </div>
+    <button class="btn-primary" onclick="doCompat()">相性を診断する</button>
+    <div class="error-msg" id="c-err">生年月日を正しく選択してください。</div>
+  </div>
+  <div class="compat-result" id="c-result"></div>
+</div>
 
-    <!-- 紋章・音バッジ -->
-    <div class="badge-row">
-      <div class="badge-item">
-        <div class="badge-label">太陽の紋章</div>
-        <div class="badge-value" id="emblem-name">--</div>
-        <div class="badge-sub" id="emblem-keyword">--</div>
-      </div>
-      <div class="badge-item">
-        <div class="badge-label">銀河の音</div>
-        <div class="badge-value" id="tone-name">--</div>
-        <div class="badge-sub" id="tone-keyword">--</div>
-      </div>
+<footer class="footer">MAYA DREAMSPELL (Jose Arguelles) | @kinuranai</footer>
+</div>
+
+<div class="share-modal" id="share-modal" onclick="closeModal(event)">
+  <div class="share-inner" onclick="event.stopPropagation()">
+    <canvas id="share-canvas" width="1080" height="1920"></canvas>
+    <div class="share-btns">
+      <button class="btn-dl gold" onclick="downloadCard()">画像を保存</button>
+      <button class="btn-dl ghost" onclick="closeModal()">閉じる</button>
     </div>
-
-    <!-- キーワードタグ -->
-    <div class="keyword-row" id="keyword-row"></div>
-
-    <!-- 本質 -->
-    <div class="section-block" id="section-personality">
-      <div class="section-title">あなたの本質</div>
-      <div class="section-body" id="text-personality"></div>
-    </div>
-
-    <!-- 使命 -->
-    <div class="section-block" id="section-mission">
-      <div class="section-title">あなたの使命</div>
-      <div class="section-body" id="text-mission"></div>
-    </div>
-
-    <!-- 向いている仕事 -->
-    <div class="section-block" id="section-jobs">
-      <div class="section-title">向いている仕事</div>
-      <div class="jobs-row" id="jobs-row"></div>
-    </div>
-
-    <!-- 恋愛傾向 -->
-    <div class="section-block" id="section-love">
-      <div class="section-title">恋愛傾向</div>
-      <div class="section-body" id="text-love"></div>
-    </div>
-
-    <!-- 相性 -->
-    <div class="section-block" id="section-compat">
-      <div class="section-title">相性最強の紋章</div>
-      <div class="compat-row" id="compat-row"></div>
-    </div>
-
-    <!-- 2026年運気 -->
-    <div class="section-block" id="section-fortune">
-      <div class="section-title">2026年の運気</div>
-      <div class="section-body" id="text-fortune"></div>
-    </div>
-
-    <!-- ラッキーカラー -->
-    <div class="section-block" id="section-lucky">
-      <div class="section-title">ラッキーカラー</div>
-      <div class="lucky-color-row">
-        <div class="lucky-color-swatch" id="lucky-swatch"></div>
-        <div class="lucky-color-text" id="text-lucky"></div>
-      </div>
-    </div>
-
-    <!-- 今日のメッセージ -->
-    <div class="today-block">
-      <div class="today-title">今日の宇宙からのメッセージ</div>
-      <div class="today-body" id="text-today"></div>
-    </div>
-
-    <!-- 注意点 -->
-    <div class="section-block" id="section-caution">
-      <div class="section-title">気をつけること</div>
-      <div class="section-body" id="text-caution"></div>
-    </div>
-
-    <!-- CTA -->
-    <div class="cta-block">
-      <div class="cta-title">もっと詳しく知りたい方へ</div>
-      <div class="cta-desc">
-        紋章が持つ深層の意味・パートナーとの相性・<br>
-        転機の時期・今世の魂のテーマを<br>
-        個別に鑑定しています。
-      </div>
-      <a class="btn-dm" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">
-        DMで「鑑定希望」と送る
-      </a>
-    </div>
-
-    <!-- フォロー -->
-    <div class="follow-block">
-      <div class="follow-text">
-        毎日のKINエネルギー・星読みを<br>
-        インスタグラムで発信しています。
-      </div>
-      <a class="btn-follow" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">
-        <svg class="ig-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-          <circle cx="12" cy="12" r="4.5"/>
-          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
-        </svg>
-        @kinuranai をフォロー
-      </a>
-    </div>
-
-  </div><!-- /result-card -->
-
-  <footer class="footer">
-    マヤ暦ドリームスペル (Jose Arguelles) 方式で算出
-  </footer>
-
-</div><!-- /container -->
+  </div>
+</div>
 
 <script>
-// =====================================================================
-// 星空アニメーション
-// =====================================================================
-(function() {
-  const canvas = document.getElementById('starfield');
-  const ctx = canvas.getContext('2d');
-  let W, H, stars = [];
-
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-
-  function initStars() {
-    stars = [];
-    const count = Math.floor((W * H) / 5000);
-    for (let i = 0; i < count; i++) {
-      stars.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: Math.random() * 1.4 + 0.2,
-        alpha: Math.random(),
-        speed: Math.random() * 0.008 + 0.003,
-        phase: Math.random() * Math.PI * 2,
-        gold: Math.random() < 0.12,
-      });
-    }
-  }
-
-  function draw(t) {
-    ctx.clearRect(0, 0, W, H);
-    stars.forEach(s => {
-      const a = 0.15 + 0.85 * (0.5 + 0.5 * Math.sin(s.phase + t * s.speed));
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      if (s.gold) {
-        ctx.fillStyle = `rgba(255,215,0,${a * 0.9})`;
-      } else {
-        ctx.fillStyle = `rgba(200,190,255,${a * 0.7})`;
-      }
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-
-  window.addEventListener('resize', () => { resize(); initStars(); });
-  resize();
-  initStars();
-  requestAnimationFrame(draw);
+// ═══════════════════════════════════════════
+// Starfield
+// ═══════════════════════════════════════════
+(function(){
+  const c=document.getElementById('starfield'),x=c.getContext('2d');let W,H,s=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight}
+  function init(){s=[];const n=Math.floor(W*H/5000);for(let i=0;i<n;i++)s.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.2,sp:Math.random()*.008+.003,ph:Math.random()*Math.PI*2,g:Math.random()<.12})}
+  function draw(t){x.clearRect(0,0,W,H);s.forEach(p=>{const a=.15+.85*(.5+.5*Math.sin(p.ph+t*p.sp));x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fillStyle=p.g?`rgba(255,215,0,${a*.9})`:`rgba(200,190,255,${a*.7})`;x.fill()});requestAnimationFrame(draw)}
+  addEventListener('resize',()=>{resize();init()});resize();init();requestAnimationFrame(draw);
 })();
 
-// =====================================================================
-// マヤ暦KIN計算
-// Anchor: 1972/3/4 = KIN 135  |  Dreamspell - Feb29 does NOT advance KIN
-// =====================================================================
-const ANCHOR = { year: 1972, month: 3, day: 4 };
-const ANCHOR_KIN = 135;
+// ═══════════════════════════════════════════
+// KIN Calculation
+// ═══════════════════════════════════════════
+const ANCHOR={y:1972,m:3,d:4},ANCHOR_KIN=135;
+function isLeap(y){return(y%4===0&&y%100!==0)||y%400===0}
+function daysBetween(a,b){return Math.round((b-a)/864e5)}
+function countLeaps(d1,d2){if(d2<=d1)return 0;let c=0;for(let y=d1.getFullYear();y<=d2.getFullYear();y++){if(!isLeap(y))continue;const ld=new Date(y,1,29);if(ld>d1&&ld<=d2)c++}return c}
+function calcKin(y,m,d){const a=new Date(ANCHOR.y,ANCHOR.m-1,ANCHOR.d),t=new Date(y,m-1,d),r=daysBetween(a,t);let lo=r>=0?countLeaps(a,t):-countLeaps(t,a);return((ANCHOR_KIN-1+r-lo)%260+260)%260+1}
+function getSeal(k){const n=k%20;return n===0?20:n}
+function getTone(k){const n=k%13;return n===0?13:n}
+function getWS(k){return Math.ceil(k/13)}
 
-function isLeapYear(y) {
-  return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
-}
-function daysBetween(d1, d2) {
-  return Math.round((d2 - d1) / 86400000);
-}
-function countLeapDaysBetween(d1, d2) {
-  if (d2 <= d1) return 0;
-  const start = d1 < d2 ? d1 : d2;
-  const end   = d1 < d2 ? d2 : d1;
-  let count = 0;
-  for (let y = start.getFullYear(); y <= end.getFullYear(); y++) {
-    if (!isLeapYear(y)) continue;
-    const leapDay = new Date(y, 1, 29);
-    if (leapDay > start && leapDay <= end) count++;
-  }
-  return count;
-}
-function calculateKin(year, month, day) {
-  const anchor = new Date(ANCHOR.year, ANCHOR.month - 1, ANCHOR.day);
-  const target = new Date(year, month - 1, day);
-  const rawDelta = daysBetween(anchor, target);
-  let leapOffset = rawDelta >= 0
-    ? countLeapDaysBetween(anchor, target)
-    : -countLeapDaysBetween(target, anchor);
-  const adjusted = rawDelta - leapOffset;
-  const kin = ((ANCHOR_KIN - 1 + adjusted) % 260 + 260) % 260 + 1;
-  return kin;
-}
-function getEmblemNumber(kin) { const n = kin % 20; return n === 0 ? 20 : n; }
-function getToneNumber(kin)   { const n = kin % 13; return n === 0 ? 13 : n; }
-function getWavespell(kin)    { return Math.ceil(kin / 13); }
-
-// =====================================================================
-// 20紋章データ（完全版）
-// =====================================================================
-const SEALS = {
-  1: {
-    ja: "赤い龍", color: "red",
-    keywords: ["母性", "愛情", "創造"],
-    personality: "全ての命を守りたいという原初的な衝動を持つ。家族や仲間への愛情が深く、「自分がいなければ」という使命感が強い。完璧主義で、愛する人のためには徹夜も厭わない。新しいものを生み出す創造力と、守り育てる母性が最大の武器。あなたがいるだけで周囲は安心する。",
-    mission: "新しいものを生み出し、愛で包み込むこと。あなたの愛情は世界を変える力を持っている。",
-    jobs: ["教育者", "医療従事者", "保育士", "カウンセラー", "助産師"],
-    love: "一度好きになると深く深く愛する一途なタイプ。時に過保護になるが、それは愛情の深さの表れ。長期的な関係で本領を発揮し、相手の全てを包み込む愛で絆を深める。",
-    compatibility: [6, 11, 16],
-    compatibility_names: ["白い世界の橋渡し", "青い猿", "黄色い戦士"],
-    lucky_color: "コーラルレッド",
-    lucky_hex: "#F08080",
-    lucky_glow: "rgba(240,128,128,0.4)",
-    fortune_2026: "2026年は「生み出す年」。温めてきたアイデアや計画が一気に形になる時期。特に春から夏にかけて新しい出会いや仕事の依頼が舞い込む。自分を信じて動き出すことが開運のカギ。",
-    today_msg: "今日は誰かに「ありがとう」を伝えてみて。あなたの愛情は、言葉にすることでもっと輝く。",
-    caution: "自己犠牲のしすぎに注意。自分を満たすことが先。「ノー」と言う練習も大切な愛の形。"
-  },
-  2: {
-    ja: "白い風", color: "white",
-    keywords: ["感性", "共感", "メッセンジャー"],
-    personality: "宇宙からのメッセージを受け取り、言葉や音楽・アートで世界に届ける使命を持つ。鋭い感性と共感力で、見えない世界と現実を繋ぐ架け橋になる。表現することで世界に光をもたらす才能があり、あなたの言葉は人の心に深く刺さる。",
-    mission: "受け取ったインスピレーションを形にして世界に届けること。沈黙の中にも力がある。",
-    jobs: ["作家", "ミュージシャン", "声優", "スピリチュアル講師", "カウンセラー"],
-    love: "感受性が豊かで、相手の気持ちを言葉より先に察知するタイプ。言葉で愛を表現するのが得意で、ロマンチックな関係を築く。傷つきやすい一面もあるが、それが深い共感力の源。",
-    compatibility: [7, 12, 17],
-    compatibility_names: ["青い手", "黄色い人", "赤い地球"],
-    lucky_color: "パールホワイト",
-    lucky_hex: "#EDE8F8",
-    lucky_glow: "rgba(216,208,240,0.4)",
-    fortune_2026: "2026年は「言葉が武器になる年」。ブログ・SNS・講座など表現活動で評価される。インスピレーションを即アウトプットすることで運気が上昇。コミュニケーションが人生を動かす。",
-    today_msg: "今日は静かな場所でひとり、心の声に耳を傾けて。答えはもう自分の中にある。",
-    caution: "周囲の感情に引きずられすぎないこと。自分の軸を持つことで本来の力が発揮できる。"
-  },
-  3: {
-    ja: "青い夜", color: "blue",
-    keywords: ["夢", "直感", "豊かさ"],
-    personality: "豊かさと夢が結びついた、直感と想像力に満ちた存在。内側に広大な宇宙を持ち、ありありとした夢を現実化する力がある。一見おとなしく見えるが、内面には誰も想像しないほど壮大なビジョンが広がっている。",
-    mission: "眠れる才能と豊かさを世界に解放すること。夢を語ることで周囲を照らす。",
-    jobs: ["起業家", "クリエイター", "投資家", "研究者", "夢分析士"],
-    love: "夢を一緒に語り合える相手に深く惹かれる。現実よりも精神的な繋がりを重視。ロマンチストで理想が高いが、理解し合えた時の絆は誰よりも深い。",
-    compatibility: [8, 13, 18],
-    compatibility_names: ["黄色い星", "赤い空歩く人", "白い鏡"],
-    lucky_color: "ミッドナイトブルー",
-    lucky_hex: "#191970",
-    lucky_glow: "rgba(79,195,247,0.4)",
-    fortune_2026: "2026年は「夢が現実になる年」。長年温めてきた計画が動き出す。金運も上昇傾向で、思い切った投資や新事業が吉。直感を信じて行動することで大きな豊かさが訪れる。",
-    today_msg: "今日、あなたの夢を紙に書き出して。言語化した夢は宇宙に届く注文書になる。",
-    caution: "現実逃避に注意。夢を追いながらも地に足をつけた行動が運を開く。"
-  },
-  4: {
-    ja: "黄色い種", color: "yellow",
-    keywords: ["探求", "学習", "開花"],
-    personality: "知識と知恵を集め、最高の花を咲かせるための旅を続ける存在。好奇心旺盛で探求心が強く、あらゆる場所から学びを得る才能がある。あなたの成長は止まることなく、積み上げた知識が人々の道標になる。",
-    mission: "学び続け、その知識で周囲に豊かさをもたらすこと。蒔いた種は必ず実る。",
-    jobs: ["研究者", "教師", "編集者", "コンサルタント", "薬剤師"],
-    love: "知的な会話ができる相手に惹かれる。一緒に成長できるパートナーシップを求める。感情より知性で繋がるタイプ。焦らずじっくり関係を深めるのが長続きの秘訣。",
-    compatibility: [9, 14, 19],
-    compatibility_names: ["赤い月", "白い魔法使い", "青い嵐"],
-    lucky_color: "フォレストグリーン",
-    lucky_hex: "#228B22",
-    lucky_glow: "rgba(34,139,34,0.4)",
-    fortune_2026: "2026年は「開花の年」。これまでの努力と学びが一気に花開く。資格取得・出版・登壇など、知識を外に発信する活動が吉。春から秋にかけて評価が急上昇する時期。",
-    today_msg: "今日は気になることをひとつ深く調べてみて。その先に新しい扉が開いている。",
-    caution: "完璧主義になりすぎず、「まず始める」を心がけて。学び続けながら行動することが大切。"
-  },
-  5: {
-    ja: "赤い蛇", color: "red",
-    keywords: ["情熱", "本能", "生命力"],
-    personality: "生命力と情熱が全身にみなぎる、本能的な強さを持つ存在。ひとつのことへの集中力が並外れており、困難を乗り越える揺るぎない意志がある。脱皮を繰り返しながら進化し続け、本能で正解を掴み取る力がある。",
-    mission: "本能的な知恵で生き抜き、生命力の使い方を世界に示すこと。",
-    jobs: ["アスリート", "経営者", "外科医", "治療師", "格闘家"],
-    love: "情熱的で一度好きになると燃え上がる。肉体的・感情的な繋がりを深く求める。嫉妬深い面もあるが、それは愛情の裏返し。浅い関係よりも全力の深い愛を求める。",
-    compatibility: [10, 15, 20],
-    compatibility_names: ["白い犬", "青い鷲", "黄色い太陽"],
-    lucky_color: "ディープレッド",
-    lucky_hex: "#8B0000",
-    lucky_glow: "rgba(139,0,0,0.5)",
-    fortune_2026: "2026年は「情熱が報われる年」。体を動かすことで運気が上昇。健康管理に気をつけながら、全力で挑んだことが大きな成果を生む。夏場は特にエネルギーが高まる。",
-    today_msg: "今日は体を動かして。ウォーキングでも筋トレでも、身体の中から活力が湧いてくる。",
-    caution: "衝動的な言動に注意。情熱を正しい方向に向けることで、その力が倍増する。"
-  },
-  6: {
-    ja: "白い世界の橋渡し", color: "white",
-    keywords: ["平和", "繋ぐ", "手放し"],
-    personality: "異なる世界や人々の間に橋を架け、平和をもたらす使命を持つ。手放しと受容の循環の中で、絶妙なバランスを保つ才能がある。あなたがいると争いが収まり、対立する人同士が自然と和解していく不思議な力がある。",
-    mission: "分断されたものを繋ぎ、世界に平和と循環をもたらすこと。",
-    jobs: ["外交官", "通訳", "仲介業", "医師", "ソーシャルワーカー"],
-    love: "穏やかで争いを好まない。愛においても平和主義。相手を受け入れる深い包容力があるが、自分の気持ちを抑えすぎないよう注意。お互いを尊重し合える関係が理想。",
-    compatibility: [1, 11, 16],
-    compatibility_names: ["赤い龍", "青い猿", "黄色い戦士"],
-    lucky_color: "スカイブルー",
-    lucky_hex: "#87CEEB",
-    lucky_glow: "rgba(135,206,235,0.4)",
-    fortune_2026: "2026年は「繋がりが財産になる年」。人脈が広がり、思わぬところから大きなチャンスが訪れる。執着を手放すほど豊かさが流れ込む。仲介・コーディネーター的な役割が評価される。",
-    today_msg: "今日は誰かの「橋渡し」をしてみて。あなたの一言が誰かの人生を変えるかもしれない。",
-    caution: "自分を犠牲にして平和を保とうとしないこと。あなた自身が幸せでいることが一番大切。"
-  },
-  7: {
-    ja: "青い手", color: "blue",
-    keywords: ["癒し", "達成", "奉仕"],
-    personality: "手から発せられる癒しのエネルギーで周囲を回復させる存在。目標達成への強い意志と、人のために行動する奉仕の精神を持つ。触れるものすべてに可能性をもたらし、何かを「完成させる」天才的な力がある。",
-    mission: "癒しと奉仕の力で、周囲の人の可能性を最大限に引き出すこと。",
-    jobs: ["セラピスト", "鍼灸師", "整体師", "外科医", "プロジェクトマネージャー"],
-    love: "相手を癒し、支えることに喜びを感じる。尽くすタイプだが、尽くしすぎて消耗することも。相手から感謝される関係が長続きの秘訣。手を繋いだ瞬間の温かさが特別な意味を持つ。",
-    compatibility: [2, 12, 17],
-    compatibility_names: ["白い風", "黄色い人", "赤い地球"],
-    lucky_color: "ターコイズ",
-    lucky_hex: "#40E0D0",
-    lucky_glow: "rgba(64,224,208,0.4)",
-    fortune_2026: "2026年は「完成の年」。長年かけて積み上げてきたものが形になる。資格・プロジェクト・人間関係、全てが完結に向かう。特に秋以降は達成感に満ちた出来事が続く。",
-    today_msg: "今日、手を使う作業に集中してみて。料理・手紙・クラフト。手の動きがあなたに気づきをくれる。",
-    caution: "完璧主義になりすぎず、「完成させる」ことを優先して。完璧でなくても動かすことが大切。"
-  },
-  8: {
-    ja: "黄色い星", color: "yellow",
-    keywords: ["美意識", "調和", "アート"],
-    personality: "宇宙の美しさと調和を体現する、アーティスティックな存在。洗練された美意識で周囲を彩り、優雅さを纏って生きる才能がある。星の輝きのように、存在するだけで世界を美しくする力を持つ。審美眼は天下一品。",
-    mission: "美しさと調和を世界に広め、人々の心に星の光を灯すこと。",
-    jobs: ["デザイナー", "アーティスト", "インテリアコーディネーター", "美容師", "写真家"],
-    love: "美しい関係を求め、所作や品格にこだわる。見た目だけでなく、内面の美しさに惹かれる。感情を直接表現するより、環境や雰囲気で愛を伝えることが多い。芸術を共に楽しめる相手が理想。",
-    compatibility: [3, 13, 18],
-    compatibility_names: ["青い夜", "赤い空歩く人", "白い鏡"],
-    lucky_color: "ゴールド",
-    lucky_hex: "#FFD700",
-    lucky_glow: "rgba(255,215,0,0.5)",
-    fortune_2026: "2026年は「美が開運を呼ぶ年」。見た目・環境・人間関係の美化が運気を高める。クリエイティブな活動で評価が上がり、思いがけない才能が開花する。インスタグラムなどビジュアルSNSが吉。",
-    today_msg: "今日、部屋に花を一輪飾って。美しい環境があなたの才能をさらに輝かせる。",
-    caution: "完璧主義から来る批判癖に注意。美しさは多様。自分と他者の美しさを両方認めることが大切。"
-  },
-  9: {
-    ja: "赤い月", color: "red",
-    keywords: ["浄化", "改革", "流れ"],
-    personality: "流れのエネルギーを受け取り、世界を浄化する力を持つ存在。月のように満ち欠けしながらも、その信念の揺るぎなさで周囲を導く。感情の波を乗りこなし、変化の流れを自ら作り出す先駆者的な存在。",
-    mission: "古いものを浄化し、新しい流れを生み出して時代を変えること。",
-    jobs: ["改革者", "活動家", "ジャーナリスト", "精神科医", "ヒーラー"],
-    love: "感情が豊かで月のように変化する愛情を持つ。相手の変化も受け入れ、共に成長することを望む。直感的に縁を感じた人との出会いを大切に。感情を流すことで愛が深まる。",
-    compatibility: [4, 14, 19],
-    compatibility_names: ["黄色い種", "白い魔法使い", "青い嵐"],
-    lucky_color: "シルバー",
-    lucky_hex: "#C0C0C0",
-    lucky_glow: "rgba(192,192,192,0.4)",
-    fortune_2026: "2026年は「流れに乗る年」。抵抗せず、宇宙の流れに委ねることで大きな変化が訪れる。特に水に関わる活動（温泉・海・雨の日の活動）が吉。感情のデトックスが運気を一変させる。",
-    today_msg: "今日はネガティブな感情を日記に書き出して、手放してみて。流すことが次への扉を開く。",
-    caution: "感情の波に飲み込まれないよう注意。感じながらも俯瞰する視点を持つことが大切。"
-  },
-  10: {
-    ja: "白い犬", color: "white",
-    keywords: ["忠誠心", "愛", "信頼"],
-    personality: "愛と忠誠心が溢れる、深い絆を育てる存在。家族や仲間を守ることへの献身と、どんな時も信頼できる誠実さがある。純粋な愛情で人の心を開き、信頼関係を築くことが人生最大の喜び。あなたの誠実さは一生ものの財産。",
-    mission: "純粋な愛と誠実さで、周囲との深い絆を育み、信頼の輪を広げること。",
-    jobs: ["社会福祉士", "獣医師", "教師", "人事担当", "コーチ"],
-    love: "一途で深い愛情を持つ。パートナーへの忠誠心は絶対。言葉より行動で愛を示す。たまに依存度が高くなりすぎることがあるが、それは愛情の証。信頼できる関係こそが全て。",
-    compatibility: [5, 15, 20],
-    compatibility_names: ["赤い蛇", "青い鷲", "黄色い太陽"],
-    lucky_color: "アイボリー",
-    lucky_hex: "#FFFFF0",
-    lucky_glow: "rgba(216,208,240,0.4)",
-    fortune_2026: "2026年は「絆が深まる年」。長年の友人や家族との関係が一段と深まる。信頼関係から生まれるビジネスチャンスも多い。誠実に行動し続けることで、大きな信頼を獲得できる年。",
-    today_msg: "今日、大切な人にシンプルに「ありがとう」を伝えて。その一言があなたの運を動かす。",
-    caution: "期待しすぎると傷つくことも。相手に求めすぎず、まず自分を愛することが愛を引き寄せる。"
-  },
-  11: {
-    ja: "青い猿", color: "blue",
-    keywords: ["遊び心", "ひらめき", "創造"],
-    personality: "遊び心とひらめきで世界を驚かせる、発想豊かな存在。ユーモアの中に深い知恵を隠し持ち、楽しみながら問題を解決する。魔法のような発想で人々を喜ばせ、遊びが仕事になる稀有な才能を持っている。",
-    mission: "遊びと創造性で世界に喜びをもたらし、人々の心を子どもに戻すこと。",
-    jobs: ["エンターテイナー", "ゲームデザイナー", "コメディアン", "玩具デザイナー", "イベントプランナー"],
-    love: "恋愛も遊びの延長線上にある。楽しい時間を共有できる相手に惹かれる。重くなりすぎず、軽やかに愛を育む。時に子どもっぽさが出るが、それが愛すべき魅力。",
-    compatibility: [1, 6, 16],
-    compatibility_names: ["赤い龍", "白い世界の橋渡し", "黄色い戦士"],
-    lucky_color: "コバルトブルー",
-    lucky_hex: "#0047AB",
-    lucky_glow: "rgba(79,195,247,0.45)",
-    fortune_2026: "2026年は「遊びが収入になる年」。趣味や遊びの延長線上に大きなビジネスチャンスが潜む。楽しいと感じることに素直に従うことで、思わぬ幸運が舞い込む。SNSやエンタメ系の活動が吉。",
-    today_msg: "今日は子どもの頃好きだったことをしてみて。その中にあなたの隠れた才能が眠っている。",
-    caution: "飽きっぽさを自覚して。才能を継続させることが最大の課題。ひとつのことを6ヶ月続けると人生が変わる。"
-  },
-  12: {
-    ja: "黄色い人", color: "yellow",
-    keywords: ["自由", "こだわり", "一芸"],
-    personality: "自由意志と個性を輝かせながら、己の道を突き進む存在。一つのことを極めるこだわりと、型にはまらない自由な発想を持つ。自分らしさを全開にして生きることで豊かさを体現する、真の自由人。",
-    mission: "自分の道を自分で切り開き、自由であることで周囲に勇気を与えること。",
-    jobs: ["フリーランサー", "起業家", "哲学者", "芸術家", "冒険家"],
-    love: "自由を最も大切にするため、縛る相手とは相性が悪い。お互いの個性を尊重し合える対等な関係が理想。距離感を大切にすることで、逆に深い絆が生まれる。",
-    compatibility: [2, 7, 17],
-    compatibility_names: ["白い風", "青い手", "赤い地球"],
-    lucky_color: "アンバー",
-    lucky_hex: "#FFBF00",
-    lucky_glow: "rgba(255,191,0,0.45)",
-    fortune_2026: "2026年は「独立の年」。会社や組織に縛られない働き方への転換が吉。副業・フリーランス・起業など、自分の力で稼ぐ仕組みを作ることで大きな自由と豊かさを手に入れる。",
-    today_msg: "今日、自分の「こうしたい」という気持ちに素直に従って。人の目を気にしない一日を過ごして。",
-    caution: "頑固になりすぎず、柔軟性も持って。自分の信念は大切に、でも他者の意見も人生の栄養になる。"
-  },
-  13: {
-    ja: "赤い空歩く人", color: "red",
-    keywords: ["探検", "奉仕", "天地の橋渡し"],
-    personality: "天と地を繋ぎ、新しい世界を探求する冒険者。高い視点で物事を俯瞰しながら、地に足のついた行動で夢を実現する。奉仕の精神を持ちながら、人々を新しい地平へと導く先駆者的存在。",
-    mission: "既知の限界を超え、新しい地平を切り開いて人々に可能性を示すこと。",
-    jobs: ["旅行家", "冒険家", "スポーツ選手", "宇宙飛行士", "精神的指導者"],
-    love: "冒険心旺盛で、非日常的な体験を共に楽しめる相手に惹かれる。旅や探検を一緒にする中で絆が深まる。自由を愛しながらも、信頼できるパートナーへの愛情は深い。",
-    compatibility: [3, 8, 18],
-    compatibility_names: ["青い夜", "黄色い星", "白い鏡"],
-    lucky_color: "サンセットオレンジ",
-    lucky_hex: "#FF6E40",
-    lucky_glow: "rgba(255,110,64,0.4)",
-    fortune_2026: "2026年は「新天地への年」。引っ越し・転職・海外移住など、新しい場所への移動が大きな運を呼ぶ。旅先での出会いが人生を変える可能性がある。行動範囲を広げることが開運の鍵。",
-    today_msg: "今日、いつもと違う道を歩いてみて。小さな探検が大きな発見につながる。",
-    caution: "放浪癖が強くなりすぎないよう注意。根を張ることも同じくらい大切な冒険。"
-  },
-  14: {
-    ja: "白い魔法使い", color: "white",
-    keywords: ["魅力", "受容", "変容"],
-    personality: "時間を超えた知恵と圧倒的な魅力で、現実を変容させる力を持つ存在。受容と誠実さで人々を惹きつけ、魔法のように状況を好転させる。あなたのそばにいるだけで不思議と物事がうまく回り始める、正真正銘の「運を持ってくる人」。",
-    mission: "純粋な心の力で奇跡を起こし、周囲の可能性を魔法のように解放すること。",
-    jobs: ["ヒーラー", "セラピスト", "俳優", "占い師", "コーチ"],
-    love: "言葉にしなくてもなぜか相手の心を掴む不思議な魅力がある。深い愛情と受容力で相手を包み込む。魔法のような雰囲気が異性を惹きつけるため、モテる傾向がある。",
-    compatibility: [4, 9, 19],
-    compatibility_names: ["黄色い種", "赤い月", "青い嵐"],
-    lucky_color: "アメジスト",
-    lucky_hex: "#9966CC",
-    lucky_glow: "rgba(153,102,204,0.45)",
-    fortune_2026: "2026年は「魔法が使える年」。強く意図を持つことで現実が動く。願望実現の力が最も高まる年。スピリチュアルな活動・瞑想・ヒーリング系の仕事が発展する。",
-    today_msg: "今日、願いを声に出して言ってみて。あなたの言葉には現実を変える魔法の力がある。",
-    caution: "他者への影響力が強いため、言葉には責任を持って。無意識の魔法が人を傷つけることもある。"
-  },
-  15: {
-    ja: "青い鷲", color: "blue",
-    keywords: ["先見性", "俯瞰", "論理"],
-    personality: "高い視点から全体を見渡し、未来を見通す先見の明を持つ存在。論理的思考と直感が融合し、誰も気づかないパターンを発見する才能がある。鷲の目で真実を見極め、創造的なビジョンを世界に示す才人。",
-    mission: "高い視点から真実を見極め、世界が向かうべき方向を示すこと。",
-    jobs: ["戦略家", "アナリスト", "映像作家", "建築家", "経営者"],
-    love: "感情より頭で恋愛を考えがち。相手の全てを見通そうとするため、最初は壁を感じさせることもある。でも一度心を開いた相手への愛情は深く、長続きする。知的な相手が理想。",
-    compatibility: [5, 10, 20],
-    compatibility_names: ["赤い蛇", "白い犬", "黄色い太陽"],
-    lucky_color: "インディゴ",
-    lucky_hex: "#4B0082",
-    lucky_glow: "rgba(79,195,247,0.4)",
-    fortune_2026: "2026年は「先見の力が評価される年」。あなたが以前から言っていたことが現実になり、周囲からの信頼が一気に高まる。長期的な投資・計画が結実する年。視野を広げるほど運気が上昇。",
-    today_msg: "今日、5年後の自分を具体的にイメージして。鷲の目で自分の未来を俯瞰してみて。",
-    caution: "頭でっかちになりすぎないよう注意。最終的には心で動くことが大切な局面もある。"
-  },
-  16: {
-    ja: "黄色い戦士", color: "yellow",
-    keywords: ["勇気", "行動力", "知の探求"],
-    personality: "勇気と行動力で困難に立ち向かう、戦士の魂を持つ存在。恐れを知りながらも前進し、知性と意志で道を切り開く力がある。問いを立て、答えを求めて進む知の戦士。チャレンジするほど強くなる。",
-    mission: "恐れを乗り越える勇気を行動で示し、人々に「できる」という希望を与えること。",
-    jobs: ["起業家", "弁護士", "自衛官", "消防士", "スポーツ選手"],
-    love: "好きな人のためなら何でもする勇敢な愛を持つ。アプローチも積極的。時に押しが強すぎることがあるが、それは愛情の表れ。相手を守ること・支えることに喜びを感じる。",
-    compatibility: [1, 6, 11],
-    compatibility_names: ["赤い龍", "白い世界の橋渡し", "青い猿"],
-    lucky_color: "ゴールデンイエロー",
-    lucky_hex: "#FFC107",
-    lucky_glow: "rgba(255,193,7,0.45)",
-    fortune_2026: "2026年は「チャレンジが報われる年」。今まで躊躇していたことに踏み出すことで大きな成果が出る。怖いと思ったことにこそ挑戦して。恐れを超えた先に人生最大のチャンスが待っている。",
-    today_msg: "今日、ひとつだけ「怖いけどやってみたいこと」に踏み出して。それがあなたの運命を動かす。",
-    caution: "戦いすぎて消耗しないよう注意。勇気は適切な休息から生まれる。休むことも戦略の一つ。"
-  },
-  17: {
-    ja: "赤い地球", color: "red",
-    keywords: ["シンクロ", "絆", "共鳴"],
-    personality: "シンクロニシティを引き寄せ、宇宙のリズムと共鳴して生きる存在。思いやりと包容力で人々の心を繋ぎ、自然なナビゲーションで道を示す。偶然の一致が多く、「引き寄せ力」が際立って高い人。",
-    mission: "宇宙のリズムと同期し、人々を正しい方向へナビゲートすること。",
-    jobs: ["ガイド", "環境活動家", "地域コーディネーター", "ヨガインストラクター", "農家"],
-    love: "縁を大切にし、出会いに深い意味を見出す。「この人と会うべくして会った」という感覚を大切にする。大地のような安定した愛情で相手を支える。",
-    compatibility: [2, 7, 12],
-    compatibility_names: ["白い風", "青い手", "黄色い人"],
-    lucky_color: "アースブラウン",
-    lucky_hex: "#8B4513",
-    lucky_glow: "rgba(240,80,80,0.35)",
-    fortune_2026: "2026年は「シンクロの年」。偶然の出来事に全て意味があると考えて行動することで、大きなチャンスを掴める。自然の中で過ごす時間が運気を高める。土に触れる活動が吉。",
-    today_msg: "今日起きた偶然に注目して。シンクロサインを見逃さないで。宇宙からのメッセージが隠れている。",
-    caution: "周囲に流されすぎないよう注意。シンクロを感じながらも自分の軸を保つことが大切。"
-  },
-  18: {
-    ja: "白い鏡", color: "white",
-    keywords: ["真実", "自立", "礼節"],
-    personality: "真実を映す鏡のように、世界の本質を見極める存在。自立心と礼節を持ちながら、無限の可能性をシンプルに反映する。内なる秩序と誠実さで、本物の美しさと真実を示す。あなた自身が世界の鏡になる。",
-    mission: "真実をありのままに映し出し、人々が自分の本当の姿を見られるよう手伝うこと。",
-    jobs: ["コーチ", "哲学者", "鑑定士", "審判", "人事評価者"],
-    love: "相手の本質を見抜く力があるため、表面的な関係には興味がない。深い内面での繋がりを求める。愛する相手に対しては完全に誠実で、嘘をつけない。",
-    compatibility: [3, 8, 13],
-    compatibility_names: ["青い夜", "黄色い星", "赤い空歩く人"],
-    lucky_color: "クリスタルシルバー",
-    lucky_hex: "#E8E4F0",
-    lucky_glow: "rgba(216,208,240,0.5)",
-    fortune_2026: "2026年は「本物が輝く年」。偽りのない誠実な行動が大きな信頼を生む。自己分析・内省の時間が運気を高める。本当の自分と向き合うほど、外側の世界が整っていく。",
-    today_msg: "今日、鏡の前で自分の目を見て。その瞳の奥に答えが映っている。",
-    caution: "批判的になりすぎないよう注意。真実を伝える時は愛を込めて。厳しさは愛情の別の顔であるべき。"
-  },
-  19: {
-    ja: "青い嵐", color: "blue",
-    keywords: ["変容", "パワー", "集中力"],
-    personality: "強大なエネルギーで変容と革新をもたらす、嵐のような存在。圧倒的な集中力と行動力で、旧来のものを壊し新しい世界を創り出す。変化の渦中にあっても揺るぎない強さを持つ。あなたが動けば時代が動く。",
-    mission: "強烈なエネルギーで古い構造を壊し、より良い新しい世界を創造すること。",
-    jobs: ["革命家", "スタートアップ経営者", "外科医", "格闘家", "改革者"],
-    love: "情熱的で激しい愛情を持つ。好きになると嵐のように追いかける。恋愛にも全力投球で、相手を圧倒することがある。落ち着いた後に示す深い愛情が本物。",
-    compatibility: [4, 9, 14],
-    compatibility_names: ["黄色い種", "赤い月", "白い魔法使い"],
-    lucky_color: "ストームグレー",
-    lucky_hex: "#708090",
-    lucky_glow: "rgba(79,195,247,0.4)",
-    fortune_2026: "2026年は「嵐が過ぎた後の快晴」。年初は混乱があるかもしれないが、その先に大きな変容と成功が待つ。恐れずに嵐に飛び込むことで、人生が一変するチャンスが掴める。",
-    today_msg: "今日、長年避けてきた問題にあえて向き合って。嵐の中にこそあなたの力が眠っている。",
-    caution: "破壊だけでなく、創造にもエネルギーを向けて。壊した後に何を作るかがあなたの真価を決める。"
-  },
-  20: {
-    ja: "黄色い太陽", color: "yellow",
-    keywords: ["輝き", "責任感", "温もり"],
-    personality: "太陽のような輝きで周囲を照らし、全ての命に温もりを与える存在。高い責任感と使命感を持ち、明るさで人々に希望をもたらす。宇宙の光として全てを照らす、まさに「生きているだけで価値がある」紋章。",
-    mission: "自分自身が輝き続けることで、周囲の全てを照らし温め続けること。",
-    jobs: ["リーダー", "経営者", "医師", "タレント", "スポーツ選手"],
-    love: "明るく開放的な愛情を持つ。相手を照らし励ます存在。自然と人が集まるため、選択肢は多い。愛した相手は全力で幸せにしようとする。",
-    compatibility: [5, 10, 15],
-    compatibility_names: ["赤い蛇", "白い犬", "青い鷲"],
-    lucky_color: "サンシャインイエロー",
-    lucky_hex: "#FFE135",
-    lucky_glow: "rgba(255,215,64,0.5)",
-    fortune_2026: "2026年は「最高の輝きの年」。あなたの才能と魅力が最大限に発揮される。リーダーシップを発揮する場面で評価が急上昇。太陽のように堂々と存在するだけで運が舞い込む。",
-    today_msg: "今日、笑顔で過ごして。あなたの笑顔は太陽と同じ。誰かの暗い日を照らしている。",
-    caution: "全ての責任を背負いすぎないよう注意。太陽も休む必要がある。自己管理が運気維持の鍵。"
-  }
+// ═══════════════════════════════════════════
+// Data: 20 Seals
+// ═══════════════════════════════════════════
+const SEAL_EN=["","The Nurturer","The Messenger","The Dreamer","The Seeker","The Survivor","The Peacemaker","The Healer","The Artist","The Purifier","The Loyalist","The Trickster","The Free Spirit","The Pioneer","The Enchanter","The Visionary","The Warrior","The Navigator","The Reflector","The Transformer","The Illuminator"];
+const SEALS={
+1:{ja:"赤い龍",color:"red",kw:["母性","愛情","創造"],
+  p:"全ての命を守りたいという原初的な衝動を持つ。家族や仲間への愛情が深く、新しいものを生み出す創造力と、守り育てる母性が最大の武器。あなたがいるだけで周囲は安心する。",
+  m:"新しいものを生み出し、愛で包み込むこと。あなたの愛情は世界を変える力を持っている。",
+  jobs:["教育者","医療従事者","保育士","カウンセラー"],
+  love:"一度好きになると深く愛する一途なタイプ。長期的な関係で本領を発揮し、相手の全てを包み込む愛で絆を深める。",
+  comp:[6,11,16],fortune:"2026年は「生み出す年」。温めてきた計画が形になる時期。春から夏に新しい出会いが舞い込む。",
+  lc:"コーラルレッド",lh:"#F08080",lg:"rgba(240,128,128,.4)",
+  msg:"今日は誰かに「ありがとう」を伝えてみて。あなたの愛情は言葉にすることで輝く。",
+  caution:"自己犠牲のしすぎに注意。自分を満たすことが先。"},
+2:{ja:"白い風",color:"white",kw:["感性","共感","メッセンジャー"],
+  p:"宇宙からのメッセージを受け取り、言葉や音楽・アートで世界に届ける使命を持つ。鋭い感性と共感力で、見えない世界と現実を繋ぐ架け橋になる。",
+  m:"受け取ったインスピレーションを形にして世界に届けること。",
+  jobs:["作家","ミュージシャン","声優","カウンセラー"],
+  love:"感受性が豊かで、相手の気持ちを言葉より先に察知する。ロマンチックな関係を築く。",
+  comp:[7,12,17],fortune:"2026年は「言葉が武器になる年」。SNS・講座など表現活動で評価される。",
+  lc:"パールホワイト",lh:"#EDE8F8",lg:"rgba(216,208,240,.4)",
+  msg:"今日は静かな場所でひとり、心の声に耳を傾けて。答えはもう自分の中にある。",
+  caution:"周囲の感情に引きずられすぎないこと。自分の軸を持つことで力が発揮できる。"},
+3:{ja:"青い夜",color:"blue",kw:["夢","直感","豊かさ"],
+  p:"豊かさと夢が結びついた直感と想像力に満ちた存在。内側に広大な宇宙を持ち、ありありとした夢を現実化する力がある。",
+  m:"眠れる才能と豊かさを世界に解放すること。夢を語ることで周囲を照らす。",
+  jobs:["起業家","クリエイター","投資家","研究者"],
+  love:"夢を一緒に語り合える相手に深く惹かれる。精神的な繋がりを重視。理解し合えた時の絆は誰よりも深い。",
+  comp:[8,13,18],fortune:"2026年は「夢が現実になる年」。金運上昇、思い切った投資が吉。",
+  lc:"ミッドナイトブルー",lh:"#191970",lg:"rgba(79,195,247,.4)",
+  msg:"今日、夢を紙に書き出して。言語化した夢は宇宙に届く注文書になる。",
+  caution:"現実逃避に注意。夢を追いながらも地に足をつけた行動を。"},
+4:{ja:"黄色い種",color:"yellow",kw:["探求","学習","開花"],
+  p:"知識と知恵を集め、最高の花を咲かせるための旅を続ける存在。好奇心旺盛で探求心が強く、成長は止まらない。",
+  m:"学び続け、その知識で周囲に豊かさをもたらすこと。",
+  jobs:["研究者","教師","編集者","コンサルタント"],
+  love:"知的な会話ができる相手に惹かれる。一緒に成長できるパートナーシップを求める。",
+  comp:[9,14,19],fortune:"2026年は「開花の年」。これまでの努力と学びが一気に花開く。",
+  lc:"フォレストグリーン",lh:"#228B22",lg:"rgba(34,139,34,.4)",
+  msg:"今日は気になることをひとつ深く調べてみて。その先に新しい扉が開いている。",
+  caution:"完璧主義になりすぎず「まず始める」を心がけて。"},
+5:{ja:"赤い蛇",color:"red",kw:["情熱","本能","生命力"],
+  p:"生命力と情熱が全身にみなぎる、本能的な強さを持つ存在。困難を乗り越える揺るぎない意志がある。",
+  m:"本能的な知恵で生き抜き、生命力の使い方を世界に示すこと。",
+  jobs:["アスリート","経営者","外科医","治療師"],
+  love:"情熱的で一度好きになると燃え上がる。全力の深い愛を求める。",
+  comp:[10,15,20],fortune:"2026年は「情熱が報われる年」。体を動かすことで運気上昇。",
+  lc:"ディープレッド",lh:"#8B0000",lg:"rgba(139,0,0,.5)",
+  msg:"今日は体を動かして。身体の中から活力が湧いてくる。",
+  caution:"衝動的な言動に注意。情熱を正しい方向に向けること。"},
+6:{ja:"白い世界の橋渡し",color:"white",kw:["平和","繋ぐ","手放し"],
+  p:"異なる世界や人々の間に橋を架け、平和をもたらす使命を持つ。あなたがいると争いが収まる不思議な力がある。",
+  m:"分断されたものを繋ぎ、世界に平和と循環をもたらすこと。",
+  jobs:["外交官","通訳","仲介業","ソーシャルワーカー"],
+  love:"穏やかで争いを好まない。深い包容力がある。お互いを尊重し合える関係が理想。",
+  comp:[1,11,16],fortune:"2026年は「繋がりが財産になる年」。人脈から大きなチャンスが訪れる。",
+  lc:"スカイブルー",lh:"#87CEEB",lg:"rgba(135,206,235,.4)",
+  msg:"今日は誰かの橋渡しをしてみて。あなたの一言が人生を変えるかもしれない。",
+  caution:"自分を犠牲にして平和を保とうとしないこと。"},
+7:{ja:"青い手",color:"blue",kw:["癒し","達成","奉仕"],
+  p:"手から発せられる癒しのエネルギーで周囲を回復させる存在。何かを「完成させる」天才的な力がある。",
+  m:"癒しと奉仕の力で、周囲の人の可能性を最大限に引き出すこと。",
+  jobs:["セラピスト","鍼灸師","整体師","プロジェクトマネージャー"],
+  love:"相手を癒し支えることに喜びを感じる。感謝される関係が長続きの秘訣。",
+  comp:[2,12,17],fortune:"2026年は「完成の年」。積み上げてきたものが形になる。",
+  lc:"ターコイズ",lh:"#40E0D0",lg:"rgba(64,224,208,.4)",
+  msg:"今日、手を使う作業に集中してみて。料理・手紙・クラフト。手の動きが気づきをくれる。",
+  caution:"完璧主義になりすぎず「完成させる」ことを優先して。"},
+8:{ja:"黄色い星",color:"yellow",kw:["美意識","調和","アート"],
+  p:"宇宙の美しさと調和を体現する存在。洗練された美意識で周囲を彩り、存在するだけで世界を美しくする力を持つ。",
+  m:"美しさと調和を世界に広め、人々の心に星の光を灯すこと。",
+  jobs:["デザイナー","アーティスト","インテリアコーディネーター","写真家"],
+  love:"美しい関係を求め、内面の美しさに惹かれる。芸術を共に楽しめる相手が理想。",
+  comp:[3,13,18],fortune:"2026年は「美が開運を呼ぶ年」。クリエイティブな活動で評価が上がる。",
+  lc:"ゴールド",lh:"#FFD700",lg:"rgba(255,215,0,.5)",
+  msg:"今日、部屋に花を一輪飾って。美しい環境があなたの才能を輝かせる。",
+  caution:"完璧主義から来る批判癖に注意。美しさは多様。"},
+9:{ja:"赤い月",color:"red",kw:["浄化","改革","流れ"],
+  p:"流れのエネルギーを受け取り世界を浄化する力を持つ存在。変化の流れを自ら作り出す先駆者。",
+  m:"古いものを浄化し、新しい流れを生み出して時代を変えること。",
+  jobs:["改革者","ジャーナリスト","精神科医","ヒーラー"],
+  love:"感情が豊かで変化する愛情を持つ。直感的に縁を感じた人との出会いを大切に。",
+  comp:[4,14,19],fortune:"2026年は「流れに乗る年」。宇宙の流れに委ねることで大きな変化が訪れる。",
+  lc:"シルバー",lh:"#C0C0C0",lg:"rgba(192,192,192,.4)",
+  msg:"今日はネガティブな感情を日記に書き出して手放してみて。",
+  caution:"感情の波に飲み込まれないよう注意。俯瞰する視点を持つこと。"},
+10:{ja:"白い犬",color:"white",kw:["忠誠心","愛","信頼"],
+  p:"愛と忠誠心が溢れる、深い絆を育てる存在。純粋な愛情で人の心を開き、信頼関係を築くことが人生最大の喜び。",
+  m:"純粋な愛と誠実さで、周囲との深い絆を育み、信頼の輪を広げること。",
+  jobs:["社会福祉士","獣医師","教師","コーチ"],
+  love:"一途で深い愛情を持つ。言葉より行動で愛を示す。信頼できる関係こそが全て。",
+  comp:[5,15,20],fortune:"2026年は「絆が深まる年」。信頼関係から大きなチャンスが生まれる。",
+  lc:"アイボリー",lh:"#FFFFF0",lg:"rgba(216,208,240,.4)",
+  msg:"今日、大切な人にシンプルに「ありがとう」を伝えて。",
+  caution:"期待しすぎると傷つくことも。まず自分を愛することが先。"},
+11:{ja:"青い猿",color:"blue",kw:["遊び心","ひらめき","創造"],
+  p:"遊び心とひらめきで世界を驚かせる存在。楽しみながら問題を解決し、魔法のような発想で人々を喜ばせる。",
+  m:"遊びと創造性で世界に喜びをもたらすこと。",
+  jobs:["エンターテイナー","ゲームデザイナー","イベントプランナー"],
+  love:"恋愛も遊びの延長線上。楽しい時間を共有できる相手に惹かれる。軽やかに愛を育む。",
+  comp:[1,6,16],fortune:"2026年は「遊びが収入になる年」。楽しいことに従うと幸運が舞い込む。",
+  lc:"コバルトブルー",lh:"#0047AB",lg:"rgba(79,195,247,.45)",
+  msg:"今日は子どもの頃好きだったことをしてみて。隠れた才能が眠っている。",
+  caution:"飽きっぽさを自覚して。ひとつを6ヶ月続けると人生が変わる。"},
+12:{ja:"黄色い人",color:"yellow",kw:["自由","こだわり","一芸"],
+  p:"自由意志と個性を輝かせながら己の道を突き進む存在。一つのことを極めるこだわりと自由な発想を持つ。",
+  m:"自分の道を自分で切り開き、自由であることで周囲に勇気を与えること。",
+  jobs:["フリーランサー","起業家","芸術家","冒険家"],
+  love:"自由を最も大切にする。お互いの個性を尊重し合える対等な関係が理想。",
+  comp:[2,7,17],fortune:"2026年は「独立の年」。自分の力で稼ぐ仕組みを作ることで大きな自由を手に入れる。",
+  lc:"アンバー",lh:"#FFBF00",lg:"rgba(255,191,0,.45)",
+  msg:"今日、自分の「こうしたい」に素直に従って。人の目を気にしない一日を。",
+  caution:"頑固になりすぎず柔軟性も持って。他者の意見も栄養になる。"},
+13:{ja:"赤い空歩く人",color:"red",kw:["探検","奉仕","天地の橋渡し"],
+  p:"天と地を繋ぎ新しい世界を探求する冒険者。高い視点で俯瞰しながら地に足のついた行動で夢を実現する。",
+  m:"既知の限界を超え、新しい地平を切り開いて人々に可能性を示すこと。",
+  jobs:["旅行家","冒険家","スポーツ選手","精神的指導者"],
+  love:"非日常的な体験を共に楽しめる相手に惹かれる。旅の中で絆が深まる。",
+  comp:[3,8,18],fortune:"2026年は「新天地への年」。引っ越し・転職など新しい場所への移動が運を呼ぶ。",
+  lc:"サンセットオレンジ",lh:"#FF6E40",lg:"rgba(255,110,64,.4)",
+  msg:"今日、いつもと違う道を歩いてみて。小さな探検が大きな発見につながる。",
+  caution:"放浪癖が強くなりすぎないよう注意。根を張ることも大切。"},
+14:{ja:"白い魔法使い",color:"white",kw:["魅力","受容","変容"],
+  p:"圧倒的な魅力で現実を変容させる力を持つ存在。あなたのそばにいるだけで物事がうまく回り始める「運を持ってくる人」。",
+  m:"純粋な心の力で奇跡を起こし、周囲の可能性を魔法のように解放すること。",
+  jobs:["ヒーラー","セラピスト","俳優","コーチ"],
+  love:"言葉にしなくても相手の心を掴む不思議な魅力がある。深い愛情と受容力で包み込む。",
+  comp:[4,9,19],fortune:"2026年は「魔法が使える年」。強く意図を持つことで現実が動く。",
+  lc:"アメジスト",lh:"#9966CC",lg:"rgba(153,102,204,.45)",
+  msg:"今日、願いを声に出して言ってみて。あなたの言葉には現実を変える魔法がある。",
+  caution:"他者への影響力が強いため言葉には責任を持って。"},
+15:{ja:"青い鷲",color:"blue",kw:["先見性","俯瞰","論理"],
+  p:"高い視点から全体を見渡し未来を見通す先見の明を持つ存在。誰も気づかないパターンを発見する才能がある。",
+  m:"高い視点から真実を見極め、世界が向かうべき方向を示すこと。",
+  jobs:["戦略家","アナリスト","映像作家","経営者"],
+  love:"感情より頭で恋愛を考えがち。心を開いた相手への愛情は深く長続きする。",
+  comp:[5,10,20],fortune:"2026年は「先見の力が評価される年」。長期的な計画が結実する。",
+  lc:"インディゴ",lh:"#4B0082",lg:"rgba(79,195,247,.4)",
+  msg:"今日、5年後の自分を具体的にイメージして。鷲の目で未来を俯瞰してみて。",
+  caution:"頭でっかちになりすぎないよう注意。心で動くことも大切。"},
+16:{ja:"黄色い戦士",color:"yellow",kw:["勇気","行動力","知の探求"],
+  p:"勇気と行動力で困難に立ち向かう戦士の魂を持つ存在。チャレンジするほど強くなる。",
+  m:"恐れを乗り越える勇気を行動で示し「できる」という希望を与えること。",
+  jobs:["起業家","弁護士","消防士","スポーツ選手"],
+  love:"好きな人のためなら何でもする勇敢な愛を持つ。相手を守ることに喜びを感じる。",
+  comp:[1,6,11],fortune:"2026年は「チャレンジが報われる年」。怖いことにこそ踏み出して。",
+  lc:"ゴールデンイエロー",lh:"#FFC107",lg:"rgba(255,193,7,.45)",
+  msg:"今日、ひとつだけ「怖いけどやりたいこと」に踏み出して。それが運命を動かす。",
+  caution:"戦いすぎて消耗しないよう注意。休むことも戦略の一つ。"},
+17:{ja:"赤い地球",color:"red",kw:["シンクロ","絆","共鳴"],
+  p:"シンクロニシティを引き寄せ、宇宙のリズムと共鳴して生きる存在。引き寄せ力が際立って高い。",
+  m:"宇宙のリズムと同期し、人々を正しい方向へナビゲートすること。",
+  jobs:["ガイド","環境活動家","ヨガインストラクター"],
+  love:"縁を大切にし出会いに深い意味を見出す。大地のような安定した愛情で支える。",
+  comp:[2,7,12],fortune:"2026年は「シンクロの年」。偶然の出来事に意味がある。自然の中で運気上昇。",
+  lc:"アースブラウン",lh:"#8B4513",lg:"rgba(240,80,80,.35)",
+  msg:"今日起きた偶然に注目して。シンクロサインを見逃さないで。",
+  caution:"周囲に流されすぎないよう注意。自分の軸を保つこと。"},
+18:{ja:"白い鏡",color:"white",kw:["真実","自立","礼節"],
+  p:"真実を映す鏡のように世界の本質を見極める存在。内なる秩序と誠実さで本物の美しさと真実を示す。",
+  m:"真実をありのままに映し出し、人々が自分の本当の姿を見られるよう手伝うこと。",
+  jobs:["コーチ","哲学者","鑑定士","審判"],
+  love:"相手の本質を見抜く力がある。表面的な関係には興味がない。完全に誠実で嘘をつけない。",
+  comp:[3,8,13],fortune:"2026年は「本物が輝く年」。誠実な行動が大きな信頼を生む。",
+  lc:"クリスタルシルバー",lh:"#E8E4F0",lg:"rgba(216,208,240,.5)",
+  msg:"今日、鏡の前で自分の目を見て。その瞳の奥に答えが映っている。",
+  caution:"批判的になりすぎないよう注意。真実は愛を込めて伝えて。"},
+19:{ja:"青い嵐",color:"blue",kw:["変容","パワー","集中力"],
+  p:"強大なエネルギーで変容と革新をもたらす嵐のような存在。あなたが動けば時代が動く。",
+  m:"強烈なエネルギーで古い構造を壊し、より良い新しい世界を創造すること。",
+  jobs:["スタートアップ経営者","外科医","改革者"],
+  love:"情熱的で激しい愛情を持つ。落ち着いた後に示す深い愛情が本物。",
+  comp:[4,9,14],fortune:"2026年は「嵐が過ぎた後の快晴」。恐れずに飛び込むことで人生が一変する。",
+  lc:"ストームグレー",lh:"#708090",lg:"rgba(79,195,247,.4)",
+  msg:"今日、長年避けてきた問題にあえて向き合って。嵐の中にこそ力が眠っている。",
+  caution:"破壊だけでなく創造にもエネルギーを向けて。"},
+20:{ja:"黄色い太陽",color:"yellow",kw:["輝き","責任感","温もり"],
+  p:"太陽のような輝きで周囲を照らし、全ての命に温もりを与える存在。生きているだけで価値がある紋章。",
+  m:"自分自身が輝き続けることで、周囲の全てを照らし温め続けること。",
+  jobs:["リーダー","経営者","医師","タレント"],
+  love:"明るく開放的な愛情を持つ。自然と人が集まる。愛した相手は全力で幸せにする。",
+  comp:[5,10,15],fortune:"2026年は「最高の輝きの年」。堂々と存在するだけで運が舞い込む。",
+  lc:"サンシャインイエロー",lh:"#FFE135",lg:"rgba(255,215,64,.5)",
+  msg:"今日、笑顔で過ごして。あなたの笑顔は太陽と同じ。誰かの暗い日を照らしている。",
+  caution:"全ての責任を背負いすぎないよう注意。太陽も休む必要がある。"}
 };
 
-// =====================================================================
-// 13の音データ（完全版）
-// =====================================================================
-const TONES = {
-  1:  { ja: "音1 磁気",    keywords: "統合・率直・信頼",   role: "始める人",    desc: "裏表がない率直な人。チームの目的を示し、新しいプロジェクトを始動させる力を持つ。リーダーとして自然に信頼を集める。" },
-  2:  { ja: "音2 月",      keywords: "二極・直感・調整",   role: "挑戦する人",  desc: "物事を二面から見る能力がある。対極を認識することで真実に近づく。パートナーシップを大切にし、協力関係で力を発揮する。" },
-  3:  { ja: "音3 電気",    keywords: "活性化・素直・奉仕", role: "奉仕する人",  desc: "電気のように素早くエネルギーを伝える。チームを活性化し、人々をつなげる奉仕の心を持つ。行動力が武器。" },
-  4:  { ja: "音4 自己存在",keywords: "形作る・探求・職人", role: "定義する人",  desc: "形のないものを具体的な形にする才能がある。探求心と職人気質で、深くひとつのことを掘り下げる。完成度へのこだわりが強い。" },
-  5:  { ja: "音5 倍音",    keywords: "力・責任・影響力",   role: "力を与える人",desc: "中心に立ち、周囲に強い影響力を持つ。表には出ないが、実際は全てを動かしている影のリーダー。責任感が人一倍強い。" },
-  6:  { ja: "音6 律動",    keywords: "冷静・平等・転機",   role: "整理する人",  desc: "リズムと均衡の力。感情に流されない冷静さと、公平に物事を見る目を持つ。人生の転機を迎えやすく、その変化が大きな成長をもたらす。" },
-  7:  { ja: "音7 共鳴",    keywords: "神秘・第六感・調和", role: "触媒になる人",desc: "第六感が鋭く、見えない世界を感じ取る力がある。神秘的な雰囲気を持ち、周囲に不思議な影響を与える共鳴体。" },
-  8:  { ja: "音8 銀河",    keywords: "調和・統合・母性",   role: "調和する人",  desc: "個人と全体を調和させる天才。愛情深く、誰もが居心地よくいられる環境を作り出す。高い理想と現実の橋渡しができる。" },
-  9:  { ja: "音9 太陽",    keywords: "集中・拡張・完成",   role: "実現する人",  desc: "意図を持って現実を動かす力がある。集中力が抜群で、始めたことを必ず完成させる。エネルギーが太陽のように外に向かって拡張する。" },
-  10: { ja: "音10 惑星",   keywords: "完璧・プロデュース・実現", role: "完成させる人", desc: "卓越したプロデュース力を持つ。全体を見渡しながら最高の成果を生み出す。完璧主義だが、その基準の高さが周囲を引き上げる。" },
-  11: { ja: "音11 分光",   keywords: "解放・変革・突破",   role: "解放する人",  desc: "固定した構造を解体し、新しい可能性を解放する。破壊と再生の力を持ち、停滞した状況に突破口を開く革命家。" },
-  12: { ja: "音12 水晶",   keywords: "協力・分かち合い・解決", role: "共有する人", desc: "複雑な問題を解決し、知恵を周囲と分かち合う。協力関係の中で最大の力を発揮。コミュニティを作る才能がある。" },
-  13: { ja: "音13 宇宙",   keywords: "変容・超越・宇宙的", role: "昇華する人",  desc: "宇宙的な視野で物事を見る。一つのサイクルの完成と次の始まりを体現する存在。変容と超越の力で、周囲を新しい次元に引き上げる。" },
+const TONES={
+1:{ja:"音1 磁気",role:"始める人",kw:"統合・率直・信頼"},
+2:{ja:"音2 月",role:"挑戦する人",kw:"二極・直感・調整"},
+3:{ja:"音3 電気",role:"奉仕する人",kw:"活性化・素直・奉仕"},
+4:{ja:"音4 自己存在",role:"定義する人",kw:"形作る・探求・職人"},
+5:{ja:"音5 倍音",role:"力を与える人",kw:"力・責任・影響力"},
+6:{ja:"音6 律動",role:"整理する人",kw:"冷静・平等・転機"},
+7:{ja:"音7 共鳴",role:"触媒になる人",kw:"神秘・第六感・調和"},
+8:{ja:"音8 銀河",role:"調和する人",kw:"調和・統合・母性"},
+9:{ja:"音9 太陽",role:"実現する人",kw:"集中・拡張・完成"},
+10:{ja:"音10 惑星",role:"完成させる人",kw:"完璧・プロデュース"},
+11:{ja:"音11 分光",role:"解放する人",kw:"解放・変革・突破"},
+12:{ja:"音12 水晶",role:"共有する人",kw:"協力・分かち合い"},
+13:{ja:"音13 宇宙",role:"昇華する人",kw:"変容・超越・宇宙的"}
 };
+const WS_NAMES=["","赤い龍","白い風","青い夜","黄色い種","赤い蛇","白い世界の橋渡し","青い手","黄色い星","赤い月","白い犬","青い猿","黄色い人","赤い空歩く人","白い魔法使い","青い鷲","黄色い戦士","赤い地球","白い鏡","青い嵐","黄色い太陽"];
 
-// =====================================================================
-// ウェイブスペル名
-// =====================================================================
-const WAVESPELL_NAMES = [
-  "", "赤い龍", "白い風", "青い夜", "黄色い種", "赤い蛇",
-  "白い世界の橋渡し", "青い手", "黄色い星", "赤い月", "白い犬",
-  "青い猿", "黄色い人", "赤い空歩く人", "白い魔法使い", "青い鷲",
-  "黄色い戦士", "赤い地球", "白い鏡", "青い嵐", "黄色い太陽"
+// ═══════════════════════════════════════════
+// Celebrities
+// ═══════════════════════════════════════════
+const CELEBS=[
+["大谷翔平",1994,7,5,"野球選手"],["羽生結弦",1994,12,7,"フィギュア"],["藤井聡太",2002,7,19,"棋士"],
+["イチロー",1973,10,22,"野球選手"],["大坂なおみ",1997,10,16,"テニス"],["本田圭佑",1986,6,13,"サッカー"],
+["佐々木朗希",2001,11,3,"野球選手"],["錦織圭",1989,12,29,"テニス"],["浅田真央",1990,9,25,"フィギュア"],
+["松山英樹",1992,2,2,"ゴルファー"],["吉田沙保里",1982,10,5,"レスリング"],
+["新垣結衣",1988,6,11,"女優"],["石原さとみ",1986,12,24,"女優"],["橋本環奈",1999,2,3,"女優"],
+["広瀬すず",1998,6,19,"女優"],["北川景子",1986,8,22,"女優"],["浜辺美波",2000,8,29,"女優"],
+["長澤まさみ",1987,6,3,"女優"],["永野芽郁",1999,9,24,"女優"],["吉沢亮",1994,2,1,"俳優"],
+["目黒蓮",1997,2,16,"俳優"],["菅田将暉",1993,2,21,"俳優"],["二宮和也",1983,6,17,"俳優"],
+["山田涼介",1993,5,9,"俳優"],
+["米津玄師",1991,3,10,"ミュージシャン"],["あいみょん",1995,3,6,"ミュージシャン"],
+["Ado",2002,10,24,"シンガー"],["宇多田ヒカル",1983,1,19,"シンガー"],
+["安室奈美恵",1977,9,20,"シンガー"],["木村拓哉",1972,11,13,"俳優"],
+["YOASOBI ikura",2000,10,1,"シンガー"],["椎名林檎",1978,11,25,"ミュージシャン"],["星野源",1981,1,28,"ミュージシャン"],
+["宮崎駿",1941,1,5,"映画監督"],["渡辺直美",1987,10,23,"タレント"],
+["田中みな実",1986,11,23,"アナウンサー"],["指原莉乃",1992,11,21,"タレント"],
+["明石家さんま",1955,7,1,"お笑い芸人"],["有吉弘行",1974,5,31,"お笑い芸人"],
+["Taylor Swift",1989,12,13,"シンガー"],["Beyoncé",1981,9,4,"シンガー"],
+["Lady Gaga",1986,3,28,"シンガー"],["Ariana Grande",1993,6,26,"シンガー"],
+["BTS Jungkook",1997,9,1,"K-POP"],["BTS V",1995,12,30,"K-POP"],["BTS RM",1994,9,12,"K-POP"],
+["BLACKPINK Lisa",1997,3,27,"K-POP"],["BLACKPINK Jennie",1996,1,16,"K-POP"],
+["Leonardo DiCaprio",1974,11,11,"俳優"],["Emma Watson",1990,4,15,"女優"],
+["Cristiano Ronaldo",1985,2,5,"サッカー"],["Lionel Messi",1987,6,24,"サッカー"],
+["Steve Jobs",1955,2,24,"起業家"],["Elon Musk",1971,6,28,"起業家"],
+["Albert Einstein",1879,3,14,"物理学者"],["Oprah Winfrey",1954,1,29,"司会者"],
+["Audrey Hepburn",1929,5,4,"女優"],["Princess Diana",1961,7,1,"王室"],
+["Michael Jackson",1958,8,29,"音楽家"],["Zendaya",1996,9,1,"女優"],
+["Harry Styles",1994,2,1,"シンガー"],["Billie Eilish",2001,12,18,"シンガー"],
+["Rihanna",1988,2,20,"シンガー"],["Justin Bieber",1994,3,1,"シンガー"]
 ];
+// Pre-compute celebrity KINs
+const celebData=CELEBS.map(c=>{const k=calcKin(c[1],c[2],c[3]);return{name:c[0],kin:k,seal:getSeal(k),field:c[4]}});
 
-// =====================================================================
-// 2026年運気ロジック
-// =====================================================================
-function getYearFortune2026(seal, tone) {
-  return SEALS[seal].fortune_2026;
+// ═══════════════════════════════════════════
+// Compatibility Engine
+// ═══════════════════════════════════════════
+const REL_TYPES=[
+  {id:"same",name:"同じ紋章",feel:"空気のような安心感",desc:"価値観・考え方が共通。余計な気遣いなしに分かり合える関係。一緒にいるだけで安心する、最も自然な繋がり。",check:(s1,s2)=>s1===s2},
+  {id:"analog",name:"類似KIN",feel:"最高の理解者",desc:"顕在意識と潜在意識が似たもの同士。「それわかる！」が止まらない最高の理解者。一緒にいて居心地がよく、情緒が安定する関係。",check:(s1,s2)=>{const a=19-s1;return s2===(a<=0?a+20:a)}},
+  {id:"mystic",name:"神秘KIN",feel:"運命的な出会い",desc:"魂レベルで惹かれ合う強いご縁。ワクワク・ドキドキする刺激的な関係。ステージを上げてくれるライバルであり、恋愛での出現率が最も高い。",check:(s1,s2)=>{const m=21-s1;return s2===(m>20?m-20:m)}},
+  {id:"anti",name:"反対KIN",feel:"成長を促すパートナー",desc:"真逆の性質を持つ相手。最初は衝突しやすいが、お互いに持っていないものを補い合う学びの関係。視野を広げてくれる存在。",check:(s1,s2)=>{const a=s1+10;return s2===(a>20?a-20:a)}},
+  {id:"guide",name:"ガイドKIN",feel:"人生の師・メンター",desc:"人生の方向性を示し、道を導いてくれる存在。時に反面教師として大切な教訓を先に教えてくれる師匠のような関係。",check:(s1,s2,t1)=>{const off={1:0,6:0,11:0,2:12,7:12,12:12,3:4,8:4,13:4,4:16,9:16,5:8,10:8};const gs=((s1-1+(off[t1]||0))%20)+1;return s2===gs}},
+  {id:"mirror",name:"鏡の向こうKIN",feel:"もう一人の自分",desc:"260KINに1つだけ存在する特別な縁。互いの潜在能力を引き出し合い、人生の道が正しいというサインを与えてくれる魂の鏡。",checkKin:(k1,k2)=>k1+k2===261},
+  {id:"absAnti",name:"絶対反対KIN",feel:"完全なる対極",desc:"260KINに1つだけの完全な反対。紋章と音が両方対立する関係。強烈な引力と反発が同時に存在し、最も深い学びをもたらす。",checkKin:(k1,k2)=>Math.abs(k1-k2)===130}
+];
+function findRelationships(k1,k2){
+  const s1=getSeal(k1),s2=getSeal(k2),t1=getTone(k1);
+  const found=[];
+  REL_TYPES.forEach(r=>{
+    if(r.checkKin){if(r.checkKin(k1,k2))found.push(r)}
+    else if(r.check(s1,s2,t1))found.push(r);
+  });
+  return found;
 }
 
-// =====================================================================
-// 今日のメッセージ（今日のKINとユーザーのKINの関係で変化）
-// =====================================================================
-function getTodayMessage(seal) {
-  return SEALS[seal].today_msg;
+// ═══════════════════════════════════════════
+// UI Helpers
+// ═══════════════════════════════════════════
+function initSelects(prefix,defY=1990,defM=7,defD=5){
+  const sy=document.getElementById(prefix+'-year'),sm=document.getElementById(prefix+'-month'),sd=document.getElementById(prefix+'-day');
+  for(let y=2024;y>=1920;y--){const o=document.createElement('option');o.value=y;o.textContent=y;sy.appendChild(o)}
+  sy.value=defY;
+  for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.textContent=m;sm.appendChild(o)}
+  sm.value=defM;
+  for(let d=1;d<=31;d++){const o=document.createElement('option');o.value=d;o.textContent=d;sd.appendChild(o)}
+  sd.value=defD;
+}
+function getDate(prefix){
+  const y=+document.getElementById(prefix+'-year').value,m=+document.getElementById(prefix+'-month').value,d=+document.getElementById(prefix+'-day').value;
+  const t=new Date(y,m-1,d);
+  if(t.getFullYear()!==y||t.getMonth()+1!==m||t.getDate()!==d)throw new Error('invalid');
+  return{y,m,d};
+}
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='personal'?0:1)));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+function colorClass(c,prefix){return prefix+'-'+c}
+const COL={red:'var(--red)',white:'var(--white-c)',blue:'var(--blue)',yellow:'var(--yellow)'};
+
+// ═══════════════════════════════════════════
+// Personal Diagnosis
+// ═══════════════════════════════════════════
+let lastPersonalData=null;
+function doPersonal(){
+  const err=document.getElementById('p-err');
+  let dt;try{dt=getDate('p');err.classList.remove('visible')}catch(e){err.classList.add('visible');return}
+  const kin=calcKin(dt.y,dt.m,dt.d),seal=getSeal(kin),tone=getTone(kin),ws=getWS(kin);
+  const s=SEALS[seal],t=TONES[tone],c=s.color;
+  lastPersonalData={kin,seal,tone,ws,s,t,c};
+
+  // Find celebrity matches (same seal)
+  const celebMatches=celebData.filter(cb=>cb.seal===seal);
+  const exactMatch=celebData.filter(cb=>cb.kin===kin);
+
+  // Build HTML
+  const card=document.getElementById('p-result');
+  card.className='result-card visible c-'+c;
+  card.innerHTML=`
+    <div class="kin-display">
+      <div class="kin-label">あなたの運命の数</div>
+      <div class="kin-number g-${c}">${kin}</div>
+      <div class="kin-sub">第${ws}ウェイブスペル | ${WS_NAMES[seal]}の旅</div>
+    </div>
+    <div class="kin-archetype t-${c}">${s.ja}</div>
+    <div class="kin-archetype-en">${SEAL_EN[seal]}</div>
+
+    ${celebMatches.length?`<div class="celeb-card">
+      <div class="celeb-label">${exactMatch.length?'完全一致！同じKINの有名人':'同じ紋章の有名人'}</div>
+      <div class="celeb-names">${(exactMatch.length?exactMatch:celebMatches).slice(0,3).map(cb=>`${cb.name}<span class="celeb-field"> ${cb.field}</span>`).join('<br>')}</div>
+    </div>`:''}
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-text">あなたのマヤ暦鑑定結果</div><div class="divider-line"></div></div>
+
+    <div class="badge-row">
+      <div class="badge-item"><div class="badge-label">太陽の紋章</div><div class="badge-value t-${c}">${s.ja}</div><div class="badge-sub">${s.kw.join('・')}</div></div>
+      <div class="badge-item"><div class="badge-label">銀河の音</div><div class="badge-value t-${c}">${t.ja}</div><div class="badge-sub">${t.role}｜${t.kw}</div></div>
+    </div>
+
+    <div class="kw-row">${s.kw.map(k=>`<span class="kw-tag k-${c}">${k}</span>`).join('')}</div>
+
+    <div class="sec b-${c}"><div class="sec-title">あなたの本質</div><div class="sec-body">${s.p}</div></div>
+    <div class="sec b-${c}"><div class="sec-title">あなたの使命</div><div class="sec-body">${s.m}</div></div>
+    <div class="sec b-${c}"><div class="sec-title">向いている仕事</div><div class="jobs-row">${s.jobs.map(j=>`<span class="job-tag">${j}</span>`).join('')}</div></div>
+    <div class="sec b-${c}"><div class="sec-title">恋愛傾向</div><div class="sec-body">${s.love}</div></div>
+    <div class="sec b-${c}"><div class="sec-title">相性最強の紋章</div><div class="compat-row">${s.comp.map(n=>`<div class="compat-item"><div class="compat-name t-${SEALS[n].color}">${SEALS[n].ja}</div></div>`).join('')}</div></div>
+    <div class="sec b-${c}"><div class="sec-title">2026年の運気</div><div class="sec-body">${s.fortune}</div></div>
+    <div class="sec b-${c}"><div class="sec-title">ラッキーカラー</div><div class="lucky-row"><div class="lucky-swatch" style="background:${s.lh};box-shadow:0 0 16px ${s.lg}"></div><div class="lucky-text">${s.lc}</div></div></div>
+
+    <div class="today-block"><div class="today-title">今日の宇宙からのメッセージ</div><div class="today-body">${getDailyMsg(seal)}</div></div>
+
+    <div class="sec b-${c}"><div class="sec-title">気をつけること</div><div class="sec-body">${s.caution}</div></div>
+
+    <div class="share-area"><button class="btn-share" onclick="openShare('personal')">シェアカードを保存</button></div>
+
+    <div class="cta-block">
+      <div class="cta-title">毎日のKINエネルギーを受け取る</div>
+      <div class="cta-desc">260のKINが織りなす宇宙のリズムを<br>毎日お届けしています。</div>
+      <a class="btn-ig" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">@kinuranai をフォロー</a>
+    </div>
+  `;
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+  // Stagger reveal
+  setTimeout(()=>{
+    const secs=card.querySelectorAll('.sec');
+    secs.forEach((el,i)=>setTimeout(()=>el.classList.add('revealed'),i*150));
+  },300);
 }
 
-// =====================================================================
-// セレクトボックス初期化
-// =====================================================================
-function initSelects() {
-  const selYear  = document.getElementById('sel-year');
-  const selMonth = document.getElementById('sel-month');
-  const selDay   = document.getElementById('sel-day');
+// ═══════════════════════════════════════════
+// Compatibility Diagnosis
+// ═══════════════════════════════════════════
+let lastCompatData=null;
+function doCompat(){
+  const err=document.getElementById('c-err');
+  let d1,d2;
+  try{d1=getDate('c1');d2=getDate('c2');err.classList.remove('visible')}catch(e){err.classList.add('visible');return}
+  const k1=calcKin(d1.y,d1.m,d1.d),k2=calcKin(d2.y,d2.m,d2.d);
+  const s1=getSeal(k1),s2=getSeal(k2),t1=getTone(k1),t2=getTone(k2);
+  const seal1=SEALS[s1],seal2=SEALS[s2];
+  const rels=findRelationships(k1,k2);
+  lastCompatData={k1,k2,s1,s2,seal1,seal2,rels};
 
-  for (let y = 2010; y >= 1930; y--) {
-    const opt = document.createElement('option');
-    opt.value = y;
-    opt.textContent = y + '年';
-    selYear.appendChild(opt);
-  }
-  selYear.value = 1990;
-
-  for (let m = 1; m <= 12; m++) {
-    const opt = document.createElement('option');
-    opt.value = m;
-    opt.textContent = m + '月';
-    selMonth.appendChild(opt);
-  }
-  selMonth.value = 7;
-
-  for (let d = 1; d <= 31; d++) {
-    const opt = document.createElement('option');
-    opt.value = d;
-    opt.textContent = d + '日';
-    selDay.appendChild(opt);
-  }
-  selDay.value = 5;
+  const res=document.getElementById('c-result');
+  res.className='compat-result visible';
+  res.innerHTML=`
+    <div class="result-card visible" style="border-color:rgba(255,215,0,.3)">
+      <div class="compat-pair">
+        <div class="compat-person"><div class="cp-label">あなた</div><div class="cp-kin t-${seal1.color}">${k1}</div><div class="cp-seal t-${seal1.color}">${seal1.ja}</div></div>
+        <div class="compat-vs">&times;</div>
+        <div class="compat-person"><div class="cp-label">お相手</div><div class="cp-kin t-${seal2.color}">${k2}</div><div class="cp-seal t-${seal2.color}">${seal2.ja}</div></div>
+      </div>
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">ふたりの関係性</div><div class="divider-line"></div></div>
+      ${rels.length?rels.map(r=>`<div class="rel-card"><div class="rel-type">${r.name}</div><div class="rel-feel">${r.feel}</div><div class="rel-desc">${r.desc}</div></div>`).join('')
+        :`<div class="no-rel">特別な紋章関係はありませんが、それは「普通」ではなく「自由な関係」。<br>固定された型にはまらない、ふたりだけの絆を築いていける組み合わせです。<br><br>音の関係: 音${t1} + 音${t2} = ${t1+t2}${t1+t2===14?' (ビジネスで最高の相性！)':''}</div>`}
+      <div class="share-area"><button class="btn-share" onclick="openShare('compat')">シェアカードを保存</button></div>
+    </div>
+  `;
+  res.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// =====================================================================
-// 診断実行
-// =====================================================================
-function diagnose() {
-  const year  = parseInt(document.getElementById('sel-year').value);
-  const month = parseInt(document.getElementById('sel-month').value);
-  const day   = parseInt(document.getElementById('sel-day').value);
-
-  const errEl = document.getElementById('error-msg');
-  try {
-    const testDate = new Date(year, month - 1, day);
-    if (
-      testDate.getFullYear() !== year ||
-      testDate.getMonth() + 1 !== month ||
-      testDate.getDate() !== day
-    ) throw new Error('invalid');
-  } catch(e) {
-    errEl.classList.add('visible');
-    return;
-  }
-  errEl.classList.remove('visible');
-
-  const kin       = calculateKin(year, month, day);
-  const emblemNum = getEmblemNumber(kin);
-  const toneNum   = getToneNumber(kin);
-  const seal      = SEALS[emblemNum];
-  const tone      = TONES[toneNum];
-  const color     = seal.color;
-  const wavespell = getWavespell(kin);
-
-  // カード表示
-  const card = document.getElementById('result-card');
-  card.className = 'result-card visible color-' + color;
-
-  // KIN番号
-  const kinEl = document.getElementById('kin-number');
-  kinEl.textContent = kin;
-  kinEl.className = 'kin-number glow-' + color;
-  document.getElementById('kin-wavespell').textContent =
-    '第' + wavespell + 'ウェイブスペル | ' + WAVESPELL_NAMES[((emblemNum - 1) % 20) + 1] + 'の旅';
-
-  // 紋章
-  const emblemNameEl = document.getElementById('emblem-name');
-  emblemNameEl.textContent = seal.ja;
-  emblemNameEl.className = 'badge-value text-' + color;
-  document.getElementById('emblem-keyword').textContent = seal.keywords.join('・');
-
-  // 音
-  const toneNameEl = document.getElementById('tone-name');
-  toneNameEl.textContent = tone.ja;
-  toneNameEl.className = 'badge-value text-' + color;
-  document.getElementById('tone-keyword').textContent = tone.role + '｜' + tone.keywords;
-
-  // キーワードタグ
-  const kwRow = document.getElementById('keyword-row');
-  kwRow.innerHTML = '';
-  seal.keywords.forEach(kw => {
-    const tag = document.createElement('span');
-    tag.className = 'keyword-tag tag-' + color;
-    tag.textContent = kw;
-    kwRow.appendChild(tag);
-  });
-  // 音キーワードも追加
-  tone.keywords.split('・').forEach(kw => {
-    const tag = document.createElement('span');
-    tag.className = 'keyword-tag tag-' + color;
-    tag.textContent = kw;
-    kwRow.appendChild(tag);
-  });
-
-  // border色を全セクションに適用
-  document.querySelectorAll('.section-block').forEach(el => {
-    el.className = 'section-block border-' + color;
-  });
-
-  // 本質
-  document.getElementById('text-personality').innerHTML =
-    seal.personality.replace(/\n/g, '<br>') +
-    '<br><br><span style="font-size:0.82rem;color:var(--text-sub)">銀河の音からの補足：</span>' +
-    '<br><span style="font-size:0.85rem;color:var(--text-sub)">' + tone.desc + '</span>';
-
-  // 使命
-  document.getElementById('text-mission').textContent = seal.mission;
-
-  // 向いている仕事
-  const jobsRow = document.getElementById('jobs-row');
-  jobsRow.innerHTML = '';
-  seal.jobs.forEach(job => {
-    const tag = document.createElement('span');
-    tag.className = 'job-tag';
-    tag.textContent = job;
-    jobsRow.appendChild(tag);
-  });
-
-  // 恋愛
-  document.getElementById('text-love').textContent = seal.love;
-
-  // 相性
-  const compatRow = document.getElementById('compat-row');
-  compatRow.innerHTML = '';
-  seal.compatibility.forEach((compatSealNum, i) => {
-    const compatSeal = SEALS[compatSealNum];
-    const item = document.createElement('div');
-    item.className = 'compat-item';
-    item.innerHTML = `
-      <div class="compat-name text-${compatSeal.color}">${compatSeal.ja}</div>
-      <div style="font-size:0.68rem;color:var(--text-sub);">${compatSeal.keywords.join('・')}</div>
-    `;
-    compatRow.appendChild(item);
-  });
-
-  // 2026年運気
-  document.getElementById('text-fortune').textContent = getYearFortune2026(emblemNum, toneNum);
-
-  // ラッキーカラー
-  const swatch = document.getElementById('lucky-swatch');
-  swatch.style.backgroundColor = seal.lucky_hex;
-  swatch.style.setProperty('--swatch-glow', seal.lucky_glow);
-  swatch.style.boxShadow = `0 0 16px ${seal.lucky_glow}`;
-  document.getElementById('text-lucky').innerHTML =
-    '<strong style="color:' + seal.lucky_hex + '">' + seal.lucky_color + '</strong><br>' +
-    '<span style="font-size:0.8rem;color:var(--text-sub)">このカラーを身につけることで、あなたの本来のエネルギーが増幅されます。</span>';
-
-  // 今日のメッセージ
-  document.getElementById('text-today').textContent = getTodayMessage(emblemNum);
-
-  // 注意点
-  document.getElementById('text-caution').textContent = seal.caution;
-
-  // スクロール
-  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+// ═══════════════════════════════════════════
+// Today's KIN
+// ═══════════════════════════════════════════
+function getDailyMsg(userSeal){
+  const now=new Date(),todayKin=calcKin(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const todaySeal=getSeal(todayKin);
+  // Combine user seal message with today's energy
+  const base=SEALS[userSeal].msg;
+  if(userSeal===todaySeal)return base+' 今日はあなたの紋章と同じエネルギーの日。力が倍増する特別な一日。';
+  return base;
+}
+function initToday(){
+  const now=new Date(),kin=calcKin(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const seal=getSeal(kin),tone=getTone(kin),s=SEALS[seal],t=TONES[tone];
+  document.getElementById('tb-kin').textContent=`KIN ${kin}  ${s.ja}  ${t.ja}`;
+  document.getElementById('tb-msg').textContent=s.msg;
 }
 
-// =====================================================================
-// 初期化
-// =====================================================================
-initSelects();
+// ═══════════════════════════════════════════
+// Share Card (Canvas)
+// ═══════════════════════════════════════════
+function openShare(type){
+  const canvas=document.getElementById('share-canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=1080;canvas.height=1920;
+  // Background
+  const bg=ctx.createLinearGradient(0,0,540,1920);
+  bg.addColorStop(0,'#0A0A2E');bg.addColorStop(.5,'#140A3E');bg.addColorStop(1,'#0D0A35');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,1080,1920);
+  // Stars
+  for(let i=0;i<200;i++){ctx.beginPath();const x=Math.random()*1080,y=Math.random()*1920,r=Math.random()*2+.5;ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=Math.random()<.1?`rgba(255,215,0,${Math.random()*.6+.2})`:`rgba(200,190,255,${Math.random()*.4+.1})`;ctx.fill()}
+
+  if(type==='personal'&&lastPersonalData){
+    const d=lastPersonalData,s=d.s;
+    const col={red:'#F05050',white:'#D8D0F0',blue:'#4FC3F7',yellow:'#FFD740'}[d.c];
+    // Gold circle
+    ctx.beginPath();ctx.arc(540,520,200,0,Math.PI*2);ctx.strokeStyle='rgba(255,215,0,.4)';ctx.lineWidth=3;ctx.stroke();
+    ctx.beginPath();ctx.arc(540,520,190,0,Math.PI*2);ctx.strokeStyle='rgba(255,215,0,.15)';ctx.lineWidth=1;ctx.stroke();
+    // Badge
+    ctx.fillStyle='rgba(255,215,0,.15)';roundRect(ctx,380,200,320,40,20);ctx.fill();
+    ctx.fillStyle='#FFD700';ctx.font='700 22px "Noto Sans JP"';ctx.textAlign='center';ctx.fillText('MAYA DREAMSPELL',540,228);
+    // KIN Number
+    ctx.fillStyle=col;ctx.font='900 180px "Noto Serif JP"';ctx.textAlign='center';ctx.fillText(d.kin,540,580);
+    // Seal name
+    ctx.fillStyle='#EDE8F8';ctx.font='700 52px "Noto Serif JP"';ctx.fillText(s.ja,540,700);
+    ctx.fillStyle='#9B96C0';ctx.font='400 28px "Noto Sans JP"';ctx.fillText(SEAL_EN[d.seal],540,750);
+    // Keywords
+    ctx.fillStyle=col;ctx.font='700 30px "Noto Sans JP"';ctx.fillText(s.kw.join('  ・  '),540,820);
+    // Celebrity
+    const celebs=celebData.filter(cb=>cb.seal===d.seal).slice(0,2);
+    if(celebs.length){
+      ctx.fillStyle='rgba(255,215,0,.1)';roundRect(ctx,120,880,840,100,16);ctx.fill();
+      ctx.strokeStyle='rgba(255,215,0,.3)';ctx.lineWidth=1;roundRect(ctx,120,880,840,100,16);ctx.stroke();
+      ctx.fillStyle='#FFD700';ctx.font='400 24px "Noto Sans JP"';ctx.fillText('同じ紋章の有名人',540,918);
+      ctx.fillStyle='#EDE8F8';ctx.font='700 32px "Noto Sans JP"';ctx.fillText(celebs.map(c=>c.name).join('  /  '),540,960);
+    }
+    // Personality
+    ctx.fillStyle='rgba(15,14,50,.9)';roundRect(ctx,80,1020,920,320,16);ctx.fill();
+    ctx.strokeStyle='rgba(255,215,0,.15)';ctx.lineWidth=1;roundRect(ctx,80,1020,920,320,16);ctx.stroke();
+    ctx.fillStyle='#FFD700';ctx.font='400 22px "Noto Sans JP"';ctx.textAlign='left';ctx.fillText('あなたの本質',130,1070);
+    ctx.fillStyle='#EDE8F8';ctx.font='400 28px "Noto Sans JP"';wrapText(ctx,s.p,130,1110,820,38);
+    // Tone
+    ctx.textAlign='center';ctx.fillStyle='#9B96C0';ctx.font='400 28px "Noto Sans JP"';ctx.fillText(`${d.t.ja} — ${d.t.role}`,540,1420);
+    // Mission
+    ctx.fillStyle='rgba(255,215,0,.08)';roundRect(ctx,80,1470,920,180,16);ctx.fill();
+    ctx.fillStyle='#FFD700';ctx.font='400 22px "Noto Sans JP"';ctx.textAlign='left';ctx.fillText('あなたの使命',130,1515);
+    ctx.fillStyle='#EDE8F8';ctx.font='400 28px "Noto Sans JP"';wrapText(ctx,s.m,130,1555,820,38);
+    // Branding
+    ctx.textAlign='center';ctx.fillStyle='#FFD700';ctx.font='900 36px "Noto Sans JP"';ctx.fillText('@kinuranai',540,1800);
+    ctx.fillStyle='#9B96C0';ctx.font='400 24px "Noto Sans JP"';ctx.fillText('無料KIN診断 → kinuranai.vercel.app',540,1845);
+  } else if(type==='compat'&&lastCompatData){
+    const d=lastCompatData;
+    const c1={red:'#F05050',white:'#D8D0F0',blue:'#4FC3F7',yellow:'#FFD740'}[d.seal1.color];
+    const c2={red:'#F05050',white:'#D8D0F0',blue:'#4FC3F7',yellow:'#FFD740'}[d.seal2.color];
+    // Title
+    ctx.fillStyle='#FFD700';ctx.font='700 28px "Noto Sans JP"';ctx.textAlign='center';ctx.fillText('MAYA DREAMSPELL 相性診断',540,200);
+    // Two KINs
+    ctx.fillStyle=c1;ctx.font='900 140px "Noto Serif JP"';ctx.fillText(d.k1,300,480);
+    ctx.fillStyle='#FFD700';ctx.font='700 60px "Noto Serif JP"';ctx.fillText('×',540,440);
+    ctx.fillStyle=c2;ctx.font='900 140px "Noto Serif JP"';ctx.fillText(d.k2,780,480);
+    ctx.fillStyle='#EDE8F8';ctx.font='700 36px "Noto Serif JP"';ctx.fillText(d.seal1.ja,300,540);ctx.fillText(d.seal2.ja,780,540);
+    // Relationships
+    let ry=680;
+    if(d.rels.length){
+      d.rels.forEach(r=>{
+        ctx.fillStyle='rgba(255,215,0,.1)';roundRect(ctx,100,ry-50,880,130,16);ctx.fill();
+        ctx.strokeStyle='rgba(255,215,0,.3)';ctx.lineWidth=1;roundRect(ctx,100,ry-50,880,130,16);ctx.stroke();
+        ctx.fillStyle='#FFD700';ctx.font='700 36px "Noto Serif JP"';ctx.fillText(r.name,540,ry);
+        ctx.fillStyle='#EDE8F8';ctx.font='400 28px "Noto Sans JP"';ctx.fillText(r.feel,540,ry+45);
+        ry+=170;
+      });
+    } else {
+      ctx.fillStyle='#9B96C0';ctx.font='400 30px "Noto Sans JP"';ctx.fillText('ふたりだけの自由な絆',540,700);
+    }
+    // Branding
+    ctx.fillStyle='#FFD700';ctx.font='900 36px "Noto Sans JP"';ctx.fillText('@kinuranai',540,1800);
+    ctx.fillStyle='#9B96C0';ctx.font='400 24px "Noto Sans JP"';ctx.fillText('無料KIN診断 → kinuranai.vercel.app',540,1845);
+  }
+  document.getElementById('share-modal').classList.add('open');
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
+function wrapText(ctx,text,x,y,maxW,lineH){const chars=text.split('');let line='';for(let i=0;i<chars.length;i++){const test=line+chars[i];if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,x,y);y+=lineH;line=chars[i]}else{line=test}}ctx.fillText(line,x,y)}
+function downloadCard(){
+  const c=document.getElementById('share-canvas'),a=document.createElement('a');
+  a.download='kinuranai_share.png';a.href=c.toDataURL('image/png');a.click();
+}
+function closeModal(e){if(!e||e.target.classList.contains('share-modal'))document.getElementById('share-modal').classList.remove('open')}
+
+// ═══════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════
+initSelects('p',1990,7,5);
+initSelects('c1',1990,7,5);
+initSelects('c2',1992,3,15);
+initToday();
 </script>
 </body>
 </html>
