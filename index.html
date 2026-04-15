@@ -628,6 +628,62 @@ function doPersonal(){
 // ═══════════════════════════════════════════
 // Compatibility Diagnosis
 // ═══════════════════════════════════════════
+// Compatibility scoring & advice engine
+const COLOR_MAP={red:'火',white:'風',blue:'水',yellow:'地'};
+const COLOR_COMPAT={
+  'fire-fire':'同じ情熱でぶつかることもあるが、お互いの炎がさらに燃え上がる組み合わせ',
+  'fire-water':'正反対に見えるが、お互いを消し合うのではなく蒸気のように新しいエネルギーを生む',
+  'fire-wind':'風が火を大きくするように、お互いの可能性を広げ合う好相性',
+  'fire-earth':'大地が火を支えるように、安定と情熱が両立する堅実な組み合わせ',
+  'water-water':'感性で深く共鳴する。言葉がなくても通じ合える静かな絆',
+  'water-wind':'風が水面を揺らすように、日常に刺激と変化をもたらす関係',
+  'water-earth':'大地が水を受け止めるように、包容力と感性が調和する',
+  'wind-wind':'お互いの言葉やアイデアが響き合い、創造的なエネルギーが生まれる',
+  'wind-earth':'自由と安定。違う価値観だからこそ学び合える成長の関係',
+  'earth-earth':'安定感抜群。信頼を積み重ねて揺るぎない絆を築く'
+};
+function getElementPair(c1,c2){
+  const map={red:'fire',white:'wind',blue:'water',yellow:'earth'};
+  const a=map[c1],b=map[c2];
+  const key=[a,b].sort().join('-');
+  return COLOR_COMPAT[key]||'ふたりだけの特別な組み合わせ';
+}
+function calcScore(rels,t1,t2,s1,s2){
+  let score=50;
+  rels.forEach(r=>{
+    if(r.id==='same')score+=22;
+    if(r.id==='analog')score+=20;
+    if(r.id==='mystic')score+=25;
+    if(r.id==='guide')score+=18;
+    if(r.id==='anti')score+=12;
+    if(r.id==='mirror')score+=20;
+    if(r.id==='absAnti')score+=8;
+  });
+  if(t1+t2===14)score+=10;
+  if(t1===t2)score+=5;
+  return Math.min(score,100);
+}
+function getAdvice(rels,seal1,seal2,t1,t2){
+  if(rels.find(r=>r.id==='mystic'))return'魂レベルで引き合うふたり。言葉にできない「なぜかこの人」という感覚を大切にして。理屈で説明できない縁こそ本物。';
+  if(rels.find(r=>r.id==='analog'))return'考え方が自然と一致するふたり。安心感が最大の武器。マンネリ防止に、たまには新しい体験を一緒にすると絆がさらに深まる。';
+  if(rels.find(r=>r.id==='same'))return'同じ紋章だからこそわかり合える反面、似すぎて衝突することも。「違い」を見つけた時こそ関係が深まるサイン。';
+  if(rels.find(r=>r.id==='guide'))return'一方が導き、一方が導かれる関係。上下ではなく「お互いの得意分野で教え合う」意識が大切。感謝の言葉を忘れずに。';
+  if(rels.find(r=>r.id==='anti'))return'正反対の価値観が最初は戸惑いを生むが、それは最大の成長材料。「なぜ自分と違うのか」を責めずに興味を持つことが鍵。';
+  if(rels.find(r=>r.id==='mirror'))return'魂の鏡のような関係。相手の中に自分の知らない自分を見る不思議な体験が起きる。直感を信じてこの縁を大切に。';
+  if(rels.find(r=>r.id==='absAnti'))return'260KINに1組しかない完全な対極。強烈に惹かれるか強烈に反発するか。この試練を超えた先に人生最大の学びがある。';
+  if(t1+t2===14)return'音の合計が14＝ビジネスベストパートナー。仕事やプロジェクトで組むと想像以上の成果が出る。信頼関係を軸にした協力が吉。';
+  return`${seal1.ja}の「${seal1.kw[0]}」と${seal2.ja}の「${seal2.kw[0]}」。異なるエネルギーが出会うことで、ひとりでは見えなかった世界が広がる関係。焦らず、お互いのペースを尊重して。`;
+}
+function getToneCompat(t1,t2){
+  const sum=t1+t2;
+  if(t1===t2)return{label:'同じ音',desc:'リズムが完全に一致。無言でも心地よい時間が流れる。行動パターンが似ているため自然体でいられる関係。'};
+  if(sum===14)return{label:'音の調和（合計14）',desc:'マヤ暦で最もバランスが取れた音の組み合わせ。ビジネスパートナーとして最高の相性。お互いの弱点を補い合える。'};
+  if(Math.abs(t1-t2)===1)return{label:'隣り合う音',desc:'半歩だけリズムがずれている絶妙な関係。お互いを刺激しつつも理解できる距離感。成長スピードが上がる。'};
+  if(sum<=8)return{label:'若いエネルギーの共鳴',desc:'ふたりとも「始まり」のエネルギーを持つ。新しいことを一緒に始めると驚くほどスムーズに進む。'};
+  if(sum>=20)return{label:'成熟したエネルギーの共鳴',desc:'ふたりとも「完成」のエネルギーを持つ。安定感があり、深い信頼関係を築ける。'};
+  return{label:'異なるリズムの融合',desc:'違うテンポだからこそ、ひとりでは奏でられないハーモニーが生まれる。お互いのリズムを尊重することが大切。'};
+}
+
 let lastCompatData=null;
 function doCompat(){
   const err=document.getElementById('c-err');
@@ -635,23 +691,74 @@ function doCompat(){
   try{d1=getDate('c1');d2=getDate('c2');err.classList.remove('visible')}catch(e){err.classList.add('visible');return}
   const k1=calcKin(d1.y,d1.m,d1.d),k2=calcKin(d2.y,d2.m,d2.d);
   const s1=getSeal(k1),s2=getSeal(k2),t1=getTone(k1),t2=getTone(k2);
-  const seal1=SEALS[s1],seal2=SEALS[s2];
+  const seal1=SEALS[s1],seal2=SEALS[s2],tone1=TONES[t1],tone2=TONES[t2];
   const rels=findRelationships(k1,k2);
-  lastCompatData={k1,k2,s1,s2,seal1,seal2,rels};
+  const score=calcScore(rels,t1,t2,s1,s2);
+  const toneC=getToneCompat(t1,t2);
+  const elemDesc=getElementPair(seal1.color,seal2.color);
+  const advice=getAdvice(rels,seal1,seal2,t1,t2);
+  // Find celebrity pair with same seal combo
+  const c1matches=celebData.filter(c=>c.seal===s1);
+  const c2matches=celebData.filter(c=>c.seal===s2);
+  lastCompatData={k1,k2,s1,s2,seal1,seal2,rels,score};
 
   const res=document.getElementById('c-result');
   res.className='compat-result visible';
   res.innerHTML=`
     <div class="result-card visible" style="border-color:rgba(255,215,0,.3)">
       <div class="compat-pair">
-        <div class="compat-person"><div class="cp-label">あなた</div><div class="cp-kin t-${seal1.color}">${k1}</div><div class="cp-seal t-${seal1.color}">${seal1.ja}</div></div>
+        <div class="compat-person"><div class="cp-label">あなた</div><div class="cp-kin t-${seal1.color}">${k1}</div><div class="cp-seal t-${seal1.color}">${seal1.ja}</div><div class="badge-sub">${SEAL_EN[s1]}</div></div>
         <div class="compat-vs">&times;</div>
-        <div class="compat-person"><div class="cp-label">お相手</div><div class="cp-kin t-${seal2.color}">${k2}</div><div class="cp-seal t-${seal2.color}">${seal2.ja}</div></div>
+        <div class="compat-person"><div class="cp-label">お相手</div><div class="cp-kin t-${seal2.color}">${k2}</div><div class="cp-seal t-${seal2.color}">${seal2.ja}</div><div class="badge-sub">${SEAL_EN[s2]}</div></div>
       </div>
-      <div class="divider"><div class="divider-line"></div><div class="divider-text">ふたりの関係性</div><div class="divider-line"></div></div>
+
+      <!-- Score Bar -->
+      <div style="text-align:center;margin:20px 0 8px">
+        <div class="sec-title">相性スコア</div>
+        <div style="font-family:'Noto Serif JP',serif;font-size:clamp(2.5rem,10vw,3.5rem);font-weight:900;color:var(--gold);line-height:1">${score}<span style="font-size:.5em;color:var(--sub)"> / 100</span></div>
+        <div style="background:var(--panel);border-radius:8px;height:12px;margin:12px 20px;overflow:hidden"><div style="height:100%;width:${score}%;background:linear-gradient(90deg,var(--gold),${score>70?'#4FC3F7':'#FFD740'});border-radius:8px;transition:width 1s ease"></div></div>
+        <div style="font-size:.78rem;color:var(--sub)">${score>=80?'奇跡的な相性。宇宙が引き合わせた特別な縁。':score>=60?'強い絆で結ばれた好相性。お互いを高め合える関係。':score>=45?'バランスの取れた関係。違いが成長の源になる。':'挑戦的だが、最も深い学びをもたらす組み合わせ。'}</div>
+      </div>
+
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">紋章の関係性</div><div class="divider-line"></div></div>
+
       ${rels.length?rels.map(r=>`<div class="rel-card"><div class="rel-type">${r.name}</div><div class="rel-feel">${r.feel}</div><div class="rel-desc">${r.desc}</div></div>`).join('')
-        :`<div class="no-rel">特別な紋章関係はありませんが、それは「普通」ではなく「自由な関係」。<br>固定された型にはまらない、ふたりだけの絆を築いていける組み合わせです。<br><br>音の関係: 音${t1} + 音${t2} = ${t1+t2}${t1+t2===14?' (ビジネスで最高の相性！)':''}</div>`}
+        :`<div class="rel-card"><div class="rel-type">自由な関係</div><div class="rel-feel">型にはまらないふたりだけの絆</div><div class="rel-desc">特定の紋章関係に縛られない自由な組み合わせ。既存の型にはまらないからこそ、ふたりだけのオリジナルな関係を築ける可能性を秘めています。</div></div>`}
+
+      <!-- Element Compatibility -->
+      <div class="sec b-yellow revealed"><div class="sec-title">エレメントの相性 — ${COLOR_MAP[seal1.color]} × ${COLOR_MAP[seal2.color]}</div><div class="sec-body">${elemDesc}</div></div>
+
+      <!-- Tone Compatibility -->
+      <div class="sec b-blue revealed"><div class="sec-title">音の相性 — ${tone1.ja} × ${tone2.ja}（${toneC.label}）</div><div class="sec-body">${toneC.desc}</div></div>
+
+      <!-- Both Profiles -->
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">ふたりの本質比較</div><div class="divider-line"></div></div>
+      <div class="sec b-${seal1.color} revealed"><div class="sec-title">${seal1.ja}（あなた）の本質</div><div class="sec-body">${seal1.p}</div></div>
+      <div class="sec b-${seal2.color} revealed"><div class="sec-title">${seal2.ja}（お相手）の本質</div><div class="sec-body">${seal2.p}</div></div>
+
+      <!-- Love Comparison -->
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">恋愛傾向の比較</div><div class="divider-line"></div></div>
+      <div class="sec b-${seal1.color} revealed"><div class="sec-title">${seal1.ja}の恋愛</div><div class="sec-body">${seal1.love}</div></div>
+      <div class="sec b-${seal2.color} revealed"><div class="sec-title">${seal2.ja}の恋愛</div><div class="sec-body">${seal2.love}</div></div>
+
+      <!-- Advice -->
+      <div class="today-block"><div class="today-title">ふたりへのアドバイス</div><div class="today-body">${advice}</div></div>
+
+      <!-- Celebrity with same seals -->
+      ${c1matches.length&&c2matches.length?`
+      <div class="celeb-card">
+        <div class="celeb-label">同じ紋章の組み合わせで例えると</div>
+        <div class="celeb-names">${c1matches[0].name}<span style="color:var(--gold)"> × </span>${c2matches[0].name}</div>
+        <div class="celeb-field">${seal1.ja} × ${seal2.ja}</div>
+      </div>`:''}
+
       <div class="share-area"><button class="btn-share" onclick="openShare('compat')">シェアカードを保存</button></div>
+
+      <div class="cta-block">
+        <div class="cta-title">毎日のKINエネルギーを受け取る</div>
+        <div class="cta-desc">ふたりの相性をさらに深く知るために<br>毎日のKIN情報をチェック</div>
+        <a class="btn-ig" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">@kinuranai をフォロー</a>
+      </div>
     </div>
   `;
   res.scrollIntoView({behavior:'smooth',block:'start'});
