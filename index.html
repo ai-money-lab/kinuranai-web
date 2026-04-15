@@ -649,19 +649,23 @@ function getElementPair(c1,c2){
   return COLOR_COMPAT[key]||'ふたりだけの特別な組み合わせ';
 }
 function calcScore(rels,t1,t2,s1,s2){
-  let score=50;
+  let score=55;
   rels.forEach(r=>{
-    if(r.id==='same')score+=22;
-    if(r.id==='analog')score+=20;
-    if(r.id==='mystic')score+=25;
-    if(r.id==='guide')score+=18;
-    if(r.id==='anti')score+=12;
-    if(r.id==='mirror')score+=20;
+    if(r.id==='same')score+=20;
+    if(r.id==='analog')score+=18;
+    if(r.id==='mystic')score+=22;
+    if(r.id==='guide')score+=15;
+    if(r.id==='anti')score+=10;
+    if(r.id==='mirror')score+=18;
     if(r.id==='absAnti')score+=8;
   });
-  if(t1+t2===14)score+=10;
+  if(t1+t2===14)score+=8;
   if(t1===t2)score+=5;
-  return Math.min(score,100);
+  // Color affinity bonus
+  const colMap={red:0,white:1,blue:2,yellow:3};
+  const cd=Math.abs(colMap[SEALS[s1].color]-colMap[SEALS[s2].color]);
+  if(cd===0)score+=5;
+  return Math.min(score,99);
 }
 function getAdvice(rels,seal1,seal2,t1,t2){
   if(rels.find(r=>r.id==='mystic'))return'魂レベルで引き合うふたり。言葉にできない「なぜかこの人」という感覚を大切にして。理屈で説明できない縁こそ本物。';
@@ -692,14 +696,13 @@ function doCompat(){
   const k1=calcKin(d1.y,d1.m,d1.d),k2=calcKin(d2.y,d2.m,d2.d);
   const s1=getSeal(k1),s2=getSeal(k2),t1=getTone(k1),t2=getTone(k2);
   const seal1=SEALS[s1],seal2=SEALS[s2],tone1=TONES[t1],tone2=TONES[t2];
-  const rels=findRelationships(k1,k2);
-  const score=calcScore(rels,t1,t2,s1,s2);
-  const toneC=getToneCompat(t1,t2);
+  // Same KIN guard
+  const sameKin=k1===k2;
+  const rels=sameKin?[{id:'same',name:'完全一致KIN',feel:'宇宙が生んだ双子の魂',desc:'260分の1の確率で同じKINを持つふたり。考え方・価値観・人生のリズムが驚くほど一致する。言葉を超えた理解が生まれる、最も稀有で特別な関係。'}]:findRelationships(k1,k2);
+  const score=sameKin?95:calcScore(rels,t1,t2,s1,s2);
+  const toneC=sameKin?{label:'完全同期',desc:'同じ音、同じリズム。ふたりの波長が完全に重なり合う。一緒にいると時間が止まったような安心感がある。'}:getToneCompat(t1,t2);
   const elemDesc=getElementPair(seal1.color,seal2.color);
-  const advice=getAdvice(rels,seal1,seal2,t1,t2);
-  // Find celebrity pair with same seal combo
-  const c1matches=celebData.filter(c=>c.seal===s1);
-  const c2matches=celebData.filter(c=>c.seal===s2);
+  const advice=sameKin?'同じKINだからこそ、お互いの「鏡」になる。相手の中に自分の長所も短所も見える。それを受け入れられた時、ふたりの絆は誰よりも深くなる。':getAdvice(rels,seal1,seal2,t1,t2);
   lastCompatData={k1,k2,s1,s2,seal1,seal2,rels,score};
 
   const res=document.getElementById('c-result');
@@ -744,13 +747,6 @@ function doCompat(){
       <!-- Advice -->
       <div class="today-block"><div class="today-title">ふたりへのアドバイス</div><div class="today-body">${advice}</div></div>
 
-      <!-- Celebrity with same seals -->
-      ${c1matches.length&&c2matches.length?`
-      <div class="celeb-card">
-        <div class="celeb-label">同じ紋章の組み合わせで例えると</div>
-        <div class="celeb-names">${c1matches[0].name}<span style="color:var(--gold)"> × </span>${c2matches[0].name}</div>
-        <div class="celeb-field">${seal1.ja} × ${seal2.ja}</div>
-      </div>`:''}
 
       <div class="share-area"><button class="btn-share" onclick="openShare('compat')">シェアカードを保存</button></div>
 
