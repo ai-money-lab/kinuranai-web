@@ -713,20 +713,32 @@ function openShare(type){
       ctx.fillStyle='#FFD700';ctx.font='400 24px "Noto Sans JP"';ctx.fillText('同じ紋章の有名人',540,918);
       ctx.fillStyle='#EDE8F8';ctx.font='700 32px "Noto Sans JP"';ctx.fillText(celebs.map(c=>c.name).join('  /  '),540,960);
     }
-    // Personality
-    ctx.fillStyle='rgba(15,14,50,.9)';roundRect(ctx,80,1020,920,320,16);ctx.fill();
-    ctx.strokeStyle='rgba(255,215,0,.15)';ctx.lineWidth=1;roundRect(ctx,80,1020,920,320,16);ctx.stroke();
-    ctx.fillStyle='#FFD700';ctx.font='400 22px "Noto Sans JP"';ctx.textAlign='left';ctx.fillText('あなたの本質',130,1070);
-    ctx.fillStyle='#EDE8F8';ctx.font='400 28px "Noto Sans JP"';wrapText(ctx,s.p,130,1110,820,38);
+    // Dynamic layout: measure text first, then draw boxes
+    const padX=130,boxX=80,boxW=920,txtW=boxW-100,lineH=36,titleH=40,boxPad=30;
+    ctx.font='400 26px "Noto Sans JP"';
+    const pLines=wrapLines(ctx,s.p,txtW);
+    const mLines=wrapLines(ctx,s.m,txtW);
+    const pBoxH=titleH+pLines.length*lineH+boxPad*2;
+    const mBoxH=titleH+mLines.length*lineH+boxPad*2;
+    let cy=1020;
+    // Personality box
+    ctx.fillStyle='rgba(15,14,50,.9)';roundRect(ctx,boxX,cy,boxW,pBoxH,16);ctx.fill();
+    ctx.strokeStyle='rgba(255,215,0,.15)';ctx.lineWidth=1;roundRect(ctx,boxX,cy,boxW,pBoxH,16);ctx.stroke();
+    ctx.fillStyle='#FFD700';ctx.font='400 22px "Noto Sans JP"';ctx.textAlign='left';ctx.fillText('あなたの本質',padX,cy+boxPad+16);
+    ctx.fillStyle='#EDE8F8';ctx.font='400 26px "Noto Sans JP"';drawWrapped(ctx,s.p,padX,cy+boxPad+titleH+10,txtW,lineH);
+    cy+=pBoxH+16;
     // Tone
-    ctx.textAlign='center';ctx.fillStyle='#9B96C0';ctx.font='400 28px "Noto Sans JP"';ctx.fillText(`${d.t.ja} — ${d.t.role}`,540,1420);
-    // Mission
-    ctx.fillStyle='rgba(255,215,0,.08)';roundRect(ctx,80,1470,920,180,16);ctx.fill();
-    ctx.fillStyle='#FFD700';ctx.font='400 22px "Noto Sans JP"';ctx.textAlign='left';ctx.fillText('あなたの使命',130,1515);
-    ctx.fillStyle='#EDE8F8';ctx.font='400 28px "Noto Sans JP"';wrapText(ctx,s.m,130,1555,820,38);
-    // Branding
-    ctx.textAlign='center';ctx.fillStyle='#FFD700';ctx.font='900 36px "Noto Sans JP"';ctx.fillText('@kinuranai',540,1800);
-    ctx.fillStyle='#9B96C0';ctx.font='400 24px "Noto Sans JP"';ctx.fillText('無料KIN診断 → kinuranai.vercel.app',540,1845);
+    ctx.textAlign='center';ctx.fillStyle='#9B96C0';ctx.font='400 26px "Noto Sans JP"';ctx.fillText(`${d.t.ja} — ${d.t.role}`,540,cy+20);
+    cy+=50;
+    // Mission box
+    ctx.fillStyle='rgba(255,215,0,.08)';roundRect(ctx,boxX,cy,boxW,mBoxH,16);ctx.fill();
+    ctx.fillStyle='#FFD700';ctx.font='400 22px "Noto Sans JP"';ctx.textAlign='left';ctx.fillText('あなたの使命',padX,cy+boxPad+16);
+    ctx.fillStyle='#EDE8F8';ctx.font='400 26px "Noto Sans JP"';drawWrapped(ctx,s.m,padX,cy+boxPad+titleH+10,txtW,lineH);
+    cy+=mBoxH+40;
+    // Branding — always at bottom
+    const brandY=Math.max(cy+20,1780);
+    ctx.textAlign='center';ctx.fillStyle='#FFD700';ctx.font='900 36px "Noto Sans JP"';ctx.fillText('@kinuranai',540,brandY);
+    ctx.fillStyle='#9B96C0';ctx.font='400 24px "Noto Sans JP"';ctx.fillText('無料KIN診断 → kinuranai.vercel.app',540,brandY+45);
   } else if(type==='compat'&&lastCompatData){
     const d=lastCompatData;
     const c1={red:'#F05050',white:'#D8D0F0',blue:'#4FC3F7',yellow:'#FFD740'}[d.seal1.color];
@@ -758,7 +770,8 @@ function openShare(type){
   document.getElementById('share-modal').classList.add('open');
 }
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
-function wrapText(ctx,text,x,y,maxW,lineH){const chars=text.split('');let line='';for(let i=0;i<chars.length;i++){const test=line+chars[i];if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,x,y);y+=lineH;line=chars[i]}else{line=test}}ctx.fillText(line,x,y)}
+function wrapLines(ctx,text,maxW){const chars=text.split('');const lines=[];let line='';for(let i=0;i<chars.length;i++){const test=line+chars[i];if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=chars[i]}else{line=test}}if(line)lines.push(line);return lines}
+function drawWrapped(ctx,text,x,y,maxW,lineH){const lines=wrapLines(ctx,text,maxW);lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lineH));return lines.length}
 function downloadCard(){
   const c=document.getElementById('share-canvas'),a=document.createElement('a');
   a.download='kinuranai_share.png';a.href=c.toDataURL('image/png');a.click();
