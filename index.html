@@ -259,11 +259,11 @@ select:focus{border-color:rgba(255,215,0,.5);box-shadow:0 0 12px rgba(255,215,0,
 // ═══════════════════════════════════════════
 // KIN Calculation
 // ═══════════════════════════════════════════
-const ANCHOR={y:1972,m:3,d:4},ANCHOR_KIN=135;
-function isLeap(y){return(y%4===0&&y%100!==0)||y%400===0}
+// Dreamspell標準: 2013-07-26 (Galactic Seed) = KIN 1
+// 単純な日数差 mod 260 で計算（閏日を引かない）
+const ANCHOR={y:2013,m:7,d:26},ANCHOR_KIN=1;
 function daysBetween(a,b){return Math.round((b-a)/864e5)}
-function countLeaps(d1,d2){if(d2<=d1)return 0;let c=0;for(let y=d1.getFullYear();y<=d2.getFullYear();y++){if(!isLeap(y))continue;const ld=new Date(y,1,29);if(ld>d1&&ld<=d2)c++}return c}
-function calcKin(y,m,d){const a=new Date(ANCHOR.y,ANCHOR.m-1,ANCHOR.d),t=new Date(y,m-1,d),r=daysBetween(a,t);let lo=r>=0?countLeaps(a,t):-countLeaps(t,a);return((ANCHOR_KIN-1+r-lo)%260+260)%260+1}
+function calcKin(y,m,d){const a=new Date(ANCHOR.y,ANCHOR.m-1,ANCHOR.d),t=new Date(y,m-1,d),r=daysBetween(a,t);return((ANCHOR_KIN-1+r)%260+260)%260+1}
 function getSeal(k){const n=k%20;return n===0?20:n}
 function getTone(k){const n=k%13;return n===0?13:n}
 function getWS(k){return Math.ceil(k/13)}
