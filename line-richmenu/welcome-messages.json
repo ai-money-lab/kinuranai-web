@@ -1,0 +1,32 @@
+{
+  "_comment": "LINE Official Account Manager → 自動応答メッセージ → あいさつメッセージ にコピー&ペースト",
+  "_format": "改行・絵文字含めてそのまま貼り付け可能",
+
+  "welcome_immediate": {
+    "_when": "友だち追加直後 (1通目)",
+    "text": "🌟 KINURANAIへようこそ ✨\n\n260のKINがあなたの使命を読み解きます。\n\nまずは生年月日を送ってください。\n例: 1995年3月15日 / 1995/3/15\n\nあなたのKIN番号と紋章を即座にお伝えします💫"
+  },
+
+  "welcome_day3": {
+    "_when": "Day 3 ステップ配信 (LINE Official Account Manager → ステップ配信)",
+    "_trigger": "友だち追加から3日後",
+    "text": "前回お伝えしたKINについて💫\n\n実は、毎月の運気は「KINと月のリズム」の組み合わせで読み解けます。\n\n📿 もっと詳しく知りたい方へ:\nあなた専用のAI深層鑑定 ¥1,980\n→ kinuranai.vercel.app/checkout.html?product=ai_divination\n\n2026年下半期の3つの転機・運命の人と出会うタイミング・裏KINの隠れた才能などを5項目で詳しくお届けします。"
+  },
+
+  "welcome_day7": {
+    "_when": "Day 7 (Day 3で購入しなかった人へ)",
+    "_trigger": "友だち追加から7日後・購入歴なし条件",
+    "text": "1週間ぶりです🌙\n\nKINURANAIの読者の方の中で、特にご相談が多いのが「人生の方向性」です。\n\n60分のZoom個人鑑定 ¥8,800 では、あなたのKINに基づいて以下を一緒に整理します:\n\n• 仕事・転職のタイミング\n• 恋愛・パートナーとの相性\n• お金の流れと貯め時\n• 2026年の重要な月\n\n月3名限定でご予約受付中:\n→ kinuranai.vercel.app/checkout.html?product=zoom_60min"
+  },
+
+  "auto_reply_qna": {
+    "_when": "ユーザーが「Q&A」と送ったら (Rich Menu 経由)",
+    "text": "💭 占いに関するよくある質問\n\nQ. 当たりますか？\n→ 占いは判断材料の一つです。最終的な選択はあなた自身が行うものですが、KINの傾向はマヤ文明から伝わる5,000年以上の歴史ある知恵です。\n\nQ. KIN番号って毎日変わる?\n→ あなた自身のKINは生年月日で固定。今日のKINとは別です。\n\nQ. 鑑定はどう届く?\n→ 決済後、ご登録のLINEに数分以内にClaude AIによる5項目深層鑑定が届きます。\n\nQ. 返金できる?\n→ デジタルコンテンツの性質上、原則返金不可ですが内容に問題があればこのLINEで返信ください。"
+  },
+
+  "auto_reply_today_kin": {
+    "_when": "ユーザーが「今日のKIN」と送ったら (Rich Menu 経由)",
+    "_implementation": "サイトAPI /api/today-kin を新規実装する想定 (LINE bot 側で動的生成)",
+    "fallback_text": "今日のKINは下記サイトでチェック✨\nhttps://kinuranai.vercel.app/\n\n生年月日を送ると、あなた自身のKINもお伝えします💫"
+  }
+}

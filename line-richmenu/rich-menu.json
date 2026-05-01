@@ -1,0 +1,47 @@
+{
+  "_comment": "LINE Bot Rich Menu config. import via LINE Messaging API: POST /v2/bot/richmenu",
+  "_setup_steps": [
+    "1. line-richmenu/rich-menu.png (2500x1686 推奨) を作成 (Canva/Figma等)",
+    "2. POST https://api.line.me/v2/bot/richmenu (このJSONをbody)",
+    "   → richMenuId 取得",
+    "3. POST https://api-data.line.me/v2/bot/richmenu/{richMenuId}/content (画像upload)",
+    "4. POST https://api.line.me/v2/bot/user/all/richmenu/{richMenuId} (全ユーザーに適用)",
+    "5. node scripts/setup-richmenu.js を実行すれば1-4を自動化"
+  ],
+  "size": { "width": 2500, "height": 1686 },
+  "selected": true,
+  "name": "KINURANAI メイン",
+  "chatBarText": "メニューを開く",
+  "areas": [
+    {
+      "_label": "今日のKIN占い",
+      "bounds": { "x": 0, "y": 0, "width": 833, "height": 843 },
+      "action": { "type": "message", "text": "今日のKIN" }
+    },
+    {
+      "_label": "相性診断 (サイトへ)",
+      "bounds": { "x": 833, "y": 0, "width": 834, "height": 843 },
+      "action": { "type": "uri", "uri": "https://kinuranai.vercel.app/#compat" }
+    },
+    {
+      "_label": "AI鑑定 ¥1,980",
+      "bounds": { "x": 1667, "y": 0, "width": 833, "height": 843 },
+      "action": { "type": "uri", "uri": "https://kinuranai.vercel.app/checkout.html?product=ai_divination" }
+    },
+    {
+      "_label": "Q&A 占い相談",
+      "bounds": { "x": 0, "y": 843, "width": 833, "height": 843 },
+      "action": { "type": "message", "text": "Q&A" }
+    },
+    {
+      "_label": "HOSHITOWA 5占術 (姉妹サービス)",
+      "bounds": { "x": 833, "y": 843, "width": 834, "height": 843 },
+      "action": { "type": "uri", "uri": "https://hoshitowa.vercel.app/" }
+    },
+    {
+      "_label": "Zoom鑑定予約 ¥8,800",
+      "bounds": { "x": 1667, "y": 843, "width": 833, "height": 843 },
+      "action": { "type": "uri", "uri": "https://kinuranai.vercel.app/checkout.html?product=zoom_60min" }
+    }
+  ]
+}

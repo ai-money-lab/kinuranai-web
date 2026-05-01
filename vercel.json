@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron-daily-broadcast",
+      "schedule": "0 22 * * *",
+      "_comment": "JST 7:00 (UTC 22:00 前日) に全LINE友だちへ今日のKINを配信"
+    }
+  ]
+}
