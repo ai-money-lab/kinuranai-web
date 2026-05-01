@@ -7,7 +7,7 @@
 //   5. このハンドラは raw body 必須なので bodyParser:false
 
 import Stripe from 'stripe';
-import { Client } from '@line/bot-sdk';
+import { messagingApi } from '@line/bot-sdk';
 
 export const config = { api: { bodyParser: false } };
 
@@ -25,9 +25,8 @@ const stripe = process.env.STRIPE_SECRET_KEY
   : null;
 
 const lineClient = process.env.LINE_CHANNEL_ACCESS_TOKEN
-  ? new Client({
+  ? new messagingApi.MessagingApiClient({
       channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-      channelSecret: process.env.LINE_CHANNEL_SECRET || '',
     })
   : null;
 
@@ -53,19 +52,22 @@ async function handleCheckoutCompleted(session) {
     const data = await r.json();
 
     if (data.divination) {
-      // LINEで鑑定結果を push
-      await lineClient.pushMessage(lineUserId, [
-        {
-          type: 'text',
-          text: `🔮 KIN${kin}の深層鑑定が届きました 🔮\n\n${data.divination}`,
-        },
-        {
-          type: 'text',
-          text:
-            `さらに詳しいZoom個人鑑定（60分・¥8,800）もご利用いただけます。\n\n` +
-            `予約はこちら:\n${process.env.PUBLIC_BASE_URL || 'https://kinuranai.vercel.app'}/api/stripe-checkout?product=zoom_60min&kin=${kin}`,
-        },
-      ]);
+      // LINEで鑑定結果を push (v9+ API)
+      await lineClient.pushMessage({
+        to: lineUserId,
+        messages: [
+          {
+            type: 'text',
+            text: `🔮 KIN${kin}の深層鑑定が届きました 🔮\n\n${data.divination}`,
+          },
+          {
+            type: 'text',
+            text:
+              `さらに詳しいZoom個人鑑定（60分・¥8,800）もご利用いただけます。\n\n` +
+              `予約はこちら:\n${process.env.PUBLIC_BASE_URL || 'https://kinuranai.vercel.app'}/api/stripe-checkout?product=zoom_60min&kin=${kin}`,
+          },
+        ],
+      });
     }
   } catch (e) {
     console.error('divination push error:', e);

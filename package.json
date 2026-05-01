@@ -10,7 +10,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.40.0",
     "@line/bot-sdk": "^9.4.0",
-    "stripe": "^17.0.0"
+    "stripe": "^19.1.0"
   },
   "engines": {
     "node": ">=18"

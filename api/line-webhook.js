@@ -4,14 +4,15 @@
 //   2. Vercel env に LINE_CHANNEL_SECRET / LINE_CHANNEL_ACCESS_TOKEN を設定
 //   3. /api/kin-divination.js も併せてデプロイ
 
-import { Client, validateSignature } from '@line/bot-sdk';
+// LINE Bot SDK v9+ 公式API (context7検証済 2026-05-01)
+import { messagingApi, validateSignature } from '@line/bot-sdk';
 
-const config = {
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || '',
-  channelSecret: process.env.LINE_CHANNEL_SECRET || '',
-};
+const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN || '';
+const channelSecret = process.env.LINE_CHANNEL_SECRET || '';
 
-const client = config.channelAccessToken ? new Client(config) : null;
+const client = channelAccessToken
+  ? new messagingApi.MessagingApiClient({ channelAccessToken })
+  : null;
 
 // 簡易KIN計算 (kinuranai-web/index.html と同じロジック)
 const ANCHOR = { y: 2013, m: 7, d: 26 };
@@ -87,17 +88,20 @@ async function handleEvent(event) {
   // 生年月日と判定できたらKIN計算
   const date = parseDate(text);
   if (date) {
-    return client.replyMessage(event.replyToken, buildKinReply(date));
+    return client.replyMessage({ replyToken: event.replyToken, messages: buildKinReply(date) });
   }
 
   // ヘルプ
-  return client.replyMessage(event.replyToken, {
-    type: 'text',
-    text:
-      `KINURANAIへようこそ✨\n\n` +
-      `生年月日を送ると、あなたのKIN番号と紋章をお伝えします。\n\n` +
-      `例:\n  1995年3月15日\n  1995/3/15\n  19950315\n\n` +
-      `毎日のKINメッセージも自動配信中💫`,
+  return client.replyMessage({
+    replyToken: event.replyToken,
+    messages: [{
+      type: 'text',
+      text:
+        `KINURANAIへようこそ✨\n\n` +
+        `生年月日を送ると、あなたのKIN番号と紋章をお伝えします。\n\n` +
+        `例:\n  1995年3月15日\n  1995/3/15\n  19950315\n\n` +
+        `毎日のKINメッセージも自動配信中💫`,
+    }],
   });
 }
 
@@ -112,7 +116,7 @@ export default async function handler(req, res) {
   // 署名検証
   const signature = req.headers['x-line-signature'];
   const body = JSON.stringify(req.body);
-  if (!validateSignature(body, config.channelSecret, signature)) {
+  if (!validateSignature(body, channelSecret, signature)) {
     return res.status(401).json({ error: 'Invalid signature' });
   }
 
