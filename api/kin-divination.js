@@ -41,9 +41,12 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   if (!anthropic) return res.status(503).json({ error: 'Anthropic not configured' });
 
-  // 内部認証
+  // C-1 fix 2026-05-01: INTERNAL_API_SECRET 未設定時は 503 で拒否 (認証skipは不可)
   const internalSecret = process.env.INTERNAL_API_SECRET;
-  if (internalSecret && req.headers['x-internal-secret'] !== internalSecret) {
+  if (!internalSecret) {
+    return res.status(503).json({ error: 'INTERNAL_API_SECRET not configured' });
+  }
+  if (req.headers['x-internal-secret'] !== internalSecret) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -56,8 +59,14 @@ export default async function handler(req, res) {
       max_tokens: 1500,
       messages: [{ role: 'user', content: buildPrompt(kin, birthdate || '不明') }],
     });
-    const text = message.content[0].text;
-    return res.status(200).json({ kin, divination: text });
+    const generated = message.content[0].text;
+    // 残存リスク3 fix 2026-05-01: 景品表示法・特定商取引法 対応の免責文言を自動付与
+    const disclaimer =
+      `\n\n---\n\n` +
+      `※ 本鑑定は古代マヤ暦の伝統的解釈に基づく娯楽・自己理解の参考情報であり、` +
+      `特定の結果や効果を保証するものではありません。重要な人生の判断は、` +
+      `ご自身の責任でお願いいたします。`;
+    return res.status(200).json({ kin, divination: generated + disclaimer });
   } catch (e) {
     console.error('claude error:', e);
     return res.status(500).json({ error: e.message });

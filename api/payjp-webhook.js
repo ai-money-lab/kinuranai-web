@@ -34,8 +34,11 @@ function verifySignature(rawBody, signature, secret) {
   }
 }
 
-async function pushLineMessage(userId, text) {
-  if (!process.env.LINE_CHANNEL_ACCESS_TOKEN || !userId) return;
+async function pushLineMessage(userId, text, eventType) {
+  if (!process.env.LINE_CHANNEL_ACCESS_TOKEN || !userId) {
+    console.warn(`[payjp-webhook] push skipped (no token or userId) type=${eventType} userId=${userId}`);
+    return false;
+  }
   try {
     const { messagingApi } = await import('@line/bot-sdk');
     const line = new messagingApi.MessagingApiClient({
@@ -45,21 +48,27 @@ async function pushLineMessage(userId, text) {
       to: userId,
       messages: [{ type: 'text', text }],
     });
+    return true;
   } catch (e) {
-    console.error('line push error:', e);
+    // H-2 fix 2026-05-01: 詳細ログ + 構造化失敗記録 (将来DB/Slack通知化可能)
+    console.error(`[payjp-webhook] push FAILED type=${eventType} userId=${userId} error=${e.message}`);
+    return false;
   }
 }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
+  // A-1 fix 2026-05-01: Webhook secret 未設定時は 503 で拒否 (検証skipは不可)
+  if (!process.env.PAYJP_WEBHOOK_SECRET) {
+    return res.status(503).json({ error: 'PAYJP_WEBHOOK_SECRET not configured' });
+  }
+
   const rawBody = await readRawBody(req);
   const signature = req.headers['x-payjp-signature'] || req.headers['payjp-signature'];
 
-  if (process.env.PAYJP_WEBHOOK_SECRET) {
-    if (!verifySignature(rawBody, signature, process.env.PAYJP_WEBHOOK_SECRET)) {
-      return res.status(401).json({ error: 'Invalid signature' });
-    }
+  if (!verifySignature(rawBody, signature, process.env.PAYJP_WEBHOOK_SECRET)) {
+    return res.status(401).json({ error: 'Invalid signature' });
   }
 
   let event;

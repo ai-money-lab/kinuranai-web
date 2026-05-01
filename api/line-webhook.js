@@ -96,13 +96,22 @@ async function handleEvent(event) {
     try {
       const baseUrl = process.env.PUBLIC_BASE_URL || 'https://kinuranai.vercel.app';
       const r = await fetch(`${baseUrl}/api/today-kin`);
+      if (!r.ok) throw new Error(`today-kin api ${r.status}`);
       const data = await r.json();
       return client.replyMessage({
         replyToken: event.replyToken,
         messages: [{ type: 'text', text: data.formatted_text || '今日のKIN取得失敗' }],
       });
     } catch (e) {
-      // fall through to help
+      // H-1 fix 2026-05-01: silent fall-through 廃止 → ユーザーへ明示メッセージ
+      console.error('today-kin fetch failed:', e);
+      return client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [{
+          type: 'text',
+          text: '今日のKINを取得できませんでした。\nしばらくしてから再度お試しください。\n\n直接ブラウザでも見られます: https://kinuranai.vercel.app/',
+        }],
+      });
     }
   }
 

@@ -54,13 +54,9 @@ button.pay:disabled{opacity:.4;cursor:not-allowed}
   <input type="text" id="line_user_id" placeholder="Uxxxxxxxxxxxxxxxxxxxxxxx">
 </div>
 
-<form>
-<script src="https://checkout.pay.jp/" class="payjp-button"
-        data-key="pk_test_PLACEHOLDER_REPLACE_AT_DEPLOY"
-        data-text="クレジットカードで支払う"
-        data-submit-text="支払う"
-        data-on-created="onPayjpToken">
-</script>
+<form id="payjp-form">
+<!-- payjp-button は publishable key を /api/payjp-config から動的fetch後に注入 (HOLD-3 fix) -->
+<div id="payjp-button-placeholder">読み込み中...</div>
 </form>
 
 <div id="status"></div>
@@ -89,10 +85,37 @@ document.getElementById('p-name').textContent = cfg.name + (kin ? ` (KIN${kin})`
 document.getElementById('p-price').textContent = cfg.amount.toLocaleString();
 if (lineUserId) document.getElementById('line_user_id').value = lineUserId;
 
-// PAY.JP Checkout のpublishable keyを HTML 上で書き換える
-// (本番ではVercel envからの値を Vercel build時に置換するのが理想だが、簡易には公開鍵なので埋め込みOK)
-const PAYJP_PK = window.PAYJP_PK_OVERRIDE || 'pk_test_PLACEHOLDER_REPLACE_AT_DEPLOY';
-document.querySelector('.payjp-button').setAttribute('data-key', PAYJP_PK);
+// HOLD-3 fix: publishable key を /api/payjp-config から動的取得 (git history に残さない)
+async function loadPayjpButton() {
+  try {
+    const r = await fetch('/api/payjp-config');
+    if (!r.ok) throw new Error(`config api ${r.status}`);
+    const { public_key } = await r.json();
+    if (!public_key) throw new Error('public_key empty');
+
+    // C-2 fix 2026-05-01: ai_divination で line_user_id 不在なら決済停止 (鑑定ロスト防止)
+    if (product === 'ai_divination' && !lineUserId && !document.getElementById('line_user_id').value) {
+      const status = document.getElementById('status');
+      status.className = 'err';
+      status.innerHTML =
+        '⚠️ AI鑑定はLINE経由でお届けする商品です。<br>' +
+        'まず <a href="' + (window.LINE_OFFICIAL_URL || 'https://lin.ee/kinuranai') + '" style="color:#FFD700">LINE公式アカウントを友だち追加</a> してから、LINE内のメッセージリンクから再度お越しください。';
+      return;
+    }
+    const placeholder = document.getElementById('payjp-button-placeholder');
+    placeholder.outerHTML =
+      `<script src="https://checkout.pay.jp/" class="payjp-button" ` +
+      `data-key="${public_key}" ` +
+      `data-text="クレジットカードで支払う" ` +
+      `data-submit-text="支払う" ` +
+      `data-on-created="onPayjpToken"><\/script>`;
+  } catch (e) {
+    const status = document.getElementById('status');
+    status.className = 'err';
+    status.textContent = '❌ 決済システム準備中です。しばらくしてから再度お試しください。(' + e.message + ')';
+  }
+}
+loadPayjpButton();
 
 window.onPayjpToken = function(payload) {
   const status = document.getElementById('status');

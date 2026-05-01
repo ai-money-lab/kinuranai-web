@@ -15,8 +15,39 @@ const PRICE_TABLE = {
   monthly_news: { amount: 1100, label: '月額KINニュースレター', recurring: true },
 };
 
+// HOLD-1 fix 2026-05-01: 失敗時にユーザーへエラー通知 + 結果を返す
 async function pushDivinationToLine(kin, birthdate, lineUserId) {
-  if (!process.env.LINE_CHANNEL_ACCESS_TOKEN || !lineUserId) return;
+  if (!process.env.LINE_CHANNEL_ACCESS_TOKEN || !lineUserId) {
+    return { ok: false, error: 'LINE not configured' };
+  }
+  let line;
+  try {
+    const { messagingApi } = await import('@line/bot-sdk');
+    line = new messagingApi.MessagingApiClient({
+      channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+    });
+  } catch (e) {
+    console.error('LINE SDK init failed:', e);
+    return { ok: false, error: 'LINE SDK init failed' };
+  }
+
+  async function notifyFailure(reason) {
+    try {
+      await line.pushMessage({
+        to: lineUserId,
+        messages: [{
+          type: 'text',
+          text:
+            `⚠️ ご決済は完了しましたが、鑑定の自動配信でエラーが発生しました。\n\n` +
+            `5分以内に手動でお届けします。お待たせして申し訳ありません。\n\n` +
+            `万一届かない場合はこのLINEに「鑑定届きません」と返信ください。\n\n(エラーコード: ${reason})`,
+        }],
+      });
+    } catch (e2) {
+      console.error('failure notification also failed:', e2);
+    }
+  }
+
   try {
     const baseUrl = process.env.PUBLIC_BASE_URL || 'https://kinuranai.vercel.app';
     const r = await fetch(`${baseUrl}/api/kin-divination`, {
@@ -27,13 +58,18 @@ async function pushDivinationToLine(kin, birthdate, lineUserId) {
       },
       body: JSON.stringify({ kin, birthdate }),
     });
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      console.error('claude api non-ok:', r.status, text);
+      await notifyFailure(`claude_${r.status}`);
+      return { ok: false, error: `claude api ${r.status}` };
+    }
     const data = await r.json();
-    if (!data.divination) return;
+    if (!data.divination) {
+      await notifyFailure('claude_empty');
+      return { ok: false, error: 'claude empty' };
+    }
 
-    const { messagingApi } = await import('@line/bot-sdk');
-    const line = new messagingApi.MessagingApiClient({
-      channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-    });
     await line.pushMessage({
       to: lineUserId,
       messages: [
@@ -46,8 +82,11 @@ async function pushDivinationToLine(kin, birthdate, lineUserId) {
         },
       ],
     });
+    return { ok: true };
   } catch (e) {
     console.error('divination push failed:', e);
+    await notifyFailure(e.code || 'unknown');
+    return { ok: false, error: e.message };
   }
 }
 
@@ -60,6 +99,22 @@ export default async function handler(req, res) {
   if (!product || !PRICE_TABLE[product]) return res.status(400).json({ error: 'invalid product' });
 
   const cfg = PRICE_TABLE[product];
+
+  // C-2 fix 2026-05-01: ai_divination は line_user_id+kin 必須 (なしだと鑑定がロストする)
+  if (product === 'ai_divination') {
+    if (!line_user_id) {
+      return res.status(400).json({
+        error: 'line_user_id required for ai_divination',
+        message: 'AI鑑定はLINE経由でお届けします。LINE登録後にお買い求めください。',
+      });
+    }
+    if (!kin) return res.status(400).json({ error: 'kin required for ai_divination' });
+  }
+
+  // M-3 fix 2026-05-01: subscription product 用の env 必須チェック
+  if (cfg.recurring && !process.env.PAYJP_PLAN_MONTHLY_NEWS) {
+    return res.status(503).json({ error: 'subscription plan not configured (PAYJP_PLAN_MONTHLY_NEWS)' });
+  }
 
   try {
     if (cfg.recurring) {
@@ -90,16 +145,20 @@ export default async function handler(req, res) {
     });
 
     if (charge.paid) {
-      // AI鑑定なら即時LINE push
-      if (product === 'ai_divination' && kin && line_user_id) {
-        // 非同期でpush (チャージレスポンスは即返す)
-        pushDivinationToLine(parseInt(kin), birthdate || '不明', line_user_id);
+      // C-1 fix 2026-05-01: AI鑑定push を await + 結果を caller に返す (fire-and-forget廃止)
+      let divinationStatus = null;
+      if (product === 'ai_divination') {
+        divinationStatus = await pushDivinationToLine(
+          parseInt(kin), birthdate || '不明', line_user_id,
+        );
       }
       return res.status(200).json({
         success: true,
         type: 'charge',
         charge_id: charge.id,
         amount: charge.amount,
+        divination_delivered: divinationStatus ? divinationStatus.ok : null,
+        divination_error: divinationStatus && !divinationStatus.ok ? divinationStatus.error : null,
       });
     }
     return res.status(402).json({ error: 'charge not paid', detail: charge });
