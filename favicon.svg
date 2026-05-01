@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="1"/>
+      <stop offset="60%" stop-color="#9B6BCF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0A0A2E" stop-opacity="1"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0A0A2E"/>
+  <circle cx="32" cy="32" r="22" fill="url(#g)"/>
+  <g fill="none" stroke="#FFD700" stroke-width="1.5" opacity="0.85">
+    <circle cx="32" cy="32" r="14"/>
+    <path d="M32 18 L32 46 M18 32 L46 32 M22 22 L42 42 M42 22 L22 42" stroke-width="0.8"/>
+  </g>
+  <circle cx="32" cy="32" r="3" fill="#FFD700"/>
+  <text x="32" y="58" font-family="serif" font-size="6" fill="#FFD700" text-anchor="middle" font-weight="700">KIN</text>
+</svg>

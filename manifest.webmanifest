@@ -1,0 +1,14 @@
+{
+  "name": "KINURANAI - 無料KIN診断",
+  "short_name": "KINURANAI",
+  "description": "マヤ暦の260のKIN番号で性格・使命・運勢を読み解く無料診断",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A2E",
+  "theme_color": "#0A0A2E",
+  "lang": "ja",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

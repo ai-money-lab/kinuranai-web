@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A0A2E"/>
+      <stop offset="50%" stop-color="#1d0830"/>
+      <stop offset="100%" stop-color="#0A0A2E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#9B6BCF" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#0A0A2E" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="950" cy="315" r="320" fill="url(#glow)" opacity="0.55"/>
+  <g transform="translate(950 315)" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.7">
+    <circle r="120"/>
+    <circle r="180"/>
+    <circle r="240"/>
+    <path d="M-260 0 L260 0 M0 -260 L0 260 M-184 -184 L184 184 M184 -184 L-184 184"/>
+  </g>
+  <circle cx="950" cy="315" r="14" fill="#FFD700"/>
+
+  <g fill="#FFD700" font-family="serif" font-weight="900">
+    <text x="80" y="200" font-size="64">KINURANAI</text>
+  </g>
+  <g fill="#EDE8F8" font-family="sans-serif">
+    <text x="80" y="270" font-size="42" font-weight="700">無料KIN診断</text>
+    <text x="80" y="330" font-size="32" opacity="0.85">マヤ暦であなたの使命を知る</text>
+  </g>
+  <g fill="#9B96C0" font-family="sans-serif" font-size="24">
+    <text x="80" y="430">✦ 260のKINで性格・使命・運勢を読み解く</text>
+    <text x="80" y="475">✦ 有名人マッチ・相性診断・シェアカード生成</text>
+    <text x="80" y="520">✦ 生年月日を入れるだけで即診断</text>
+  </g>
+  <text x="80" y="595" fill="#FFD700" font-family="sans-serif" font-size="22" font-weight="700">kinuranai.vercel.app</text>
+</svg>
