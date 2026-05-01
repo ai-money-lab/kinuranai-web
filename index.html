@@ -136,6 +136,23 @@ select:focus{border-color:rgba(255,215,0,.5);box-shadow:0 0 12px rgba(255,215,0,
 .cta-block{background:linear-gradient(135deg,rgba(100,30,180,.4),rgba(20,80,180,.4));border:1px solid rgba(255,215,0,.25);border-radius:20px;padding:28px 22px;text-align:center;margin-bottom:20px}
 .cta-title{font-family:'Noto Serif JP',serif;font-size:1.05rem;font-weight:700;margin-bottom:10px;color:var(--gold)}
 .cta-desc{font-size:.82rem;color:var(--sub);line-height:1.8;margin-bottom:18px}
+.btn-line{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#06C755,#04A547);color:#fff;border-radius:50px;font-weight:700;text-decoration:none;font-size:.95rem;box-shadow:0 4px 16px rgba(6,199,85,.4);transition:all .2s;margin-top:10px}
+.btn-line:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(6,199,85,.6)}
+/* Premium深層鑑定セクション */
+.premium-section{position:relative;margin-top:24px;border-radius:20px;overflow:hidden;border:1px solid rgba(255,215,0,.3);background:linear-gradient(135deg,rgba(60,20,100,.5),rgba(120,60,180,.4))}
+.premium-content{padding:28px 22px;transition:filter .3s}
+.premium-section.locked .premium-content{filter:blur(8px);pointer-events:none;user-select:none}
+.unlock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(20,10,40,.4) 0%,rgba(20,10,40,.85) 50%,rgba(20,10,40,.95) 100%);padding:24px;text-align:center;z-index:5}
+.premium-section:not(.locked) .unlock-overlay{display:none}
+.unlock-icon{font-size:2.2rem;margin-bottom:14px;color:var(--gold)}
+.unlock-title{font-family:'Noto Serif JP',serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:10px}
+.unlock-desc{font-size:.85rem;color:#fff;line-height:1.8;margin-bottom:20px;max-width:320px}
+.unlock-meta{font-size:.72rem;color:var(--sub);margin-top:14px;line-height:1.6}
+.premium-title{font-family:'Noto Serif JP',serif;font-size:1.05rem;font-weight:700;margin-bottom:14px;color:var(--gold);text-align:center}
+.premium-list{list-style:none;padding:0;margin:0}
+.premium-list li{padding:10px 0;border-bottom:1px solid rgba(255,215,0,.15);font-size:.88rem;color:#e8dfff}
+.premium-list li:last-child{border-bottom:0}
+.premium-list b{color:var(--gold);font-weight:700}
 .btn-ig{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:linear-gradient(135deg,#5B2C8B,#1E3A7E);border:1px solid rgba(255,215,0,.2);border-radius:50px;color:var(--txt);font-family:'Noto Sans JP',sans-serif;font-size:.88rem;font-weight:700;text-decoration:none;transition:all .25s}
 .btn-ig:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(91,44,139,.5)}
 
@@ -245,6 +262,62 @@ select:focus{border-color:rgba(255,215,0,.5);box-shadow:0 0 12px rgba(255,215,0,
 </div>
 
 <script>
+// ═══════════════════════════════════════════
+// LINE Lock / Premium Unlock (2026-05-01 NOTE_MONETIZATION_MASTER_PLAN Phase 6)
+// ═══════════════════════════════════════════
+// localStorage または ?from=line / ?unlocked=1 でアンロック.
+// 実LINE Login API は別sprintで実装. 現状はclient-side soft-gate.
+function isUnlocked(){
+  try{
+    if(localStorage.getItem('kinuranai_line_unlocked')==='1') return true;
+    const u=new URL(location.href);
+    if(u.searchParams.get('unlocked')==='1' || u.searchParams.get('from')==='line'){
+      try{localStorage.setItem('kinuranai_line_unlocked','1')}catch(e){}
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function markLineClick(){
+  try{
+    localStorage.setItem('kinuranai_line_clicked',new Date().toISOString());
+    // 戻ってきた時にアンロックする想定 (本格実装時はOAuth)
+    localStorage.setItem('kinuranai_line_unlocked','1');
+  }catch(e){}
+}
+// 深層鑑定文言 (KIN紋章別の固有メッセージ・5項目分)
+function getDeepFortune(seal,n){
+  const SEAL_DEEP={
+    'red':[
+      '7月後半にひとつの大きな決断が訪れる。それを境に半年単位で人生の軌道が変わる',
+      '満月の夜に「この人だ」と直感で気づく相手と縁が生まれる時期は2026年9月以降',
+      '創造性を活かす仕事で大きく開花する一方、人に合わせすぎる傾向に注意',
+      '春先に金運の波が高まる。新しい挑戦への先行投資が後で大きく返ってくる年'
+    ],
+    'white':[
+      '8月にこれまで築いた人脈が結晶化し、想定外のオファーが届く転機がくる',
+      '誠実な対話を重ねる相手と信頼が育つ。出会いは秋以降がピーク',
+      '冷静な分析力が買われる年。ただし完璧主義で自分を追い込みすぎる場面に注意',
+      '安定した収入を生む仕組み作りに集中するべき年。短期投機は控えるのが吉'
+    ],
+    'blue':[
+      '10月に長年抱えてきた課題が大きく前進する時期が訪れる',
+      '直感的な共鳴で出会う相手との縁が深まりやすい年。冬至前後に注目',
+      '変化を受け入れる柔軟性が成果に結びつく一方、振り回されない軸を持つこと',
+      '不規則だが波の大きい金運。タイミングを掴めば一気に拡大する局面がある'
+    ],
+    'yellow':[
+      '12月に大きな実りを迎える。それまでの積み重ねが目に見える形で実を結ぶ',
+      '安定と成長を両立できる相手と長期的な縁が育ちやすい一年',
+      '具体性と実行力が評価される年。理想だけで終わらせず形にすること',
+      '堅実な蓄えと中長期投資が功を奏する年。攻めすぎず守りを固めるのが正解'
+    ]
+  };
+  const c=(SEALS[seal]||{}).color||'red';
+  const arr=SEAL_DEEP[c]||SEAL_DEEP.red;
+  return arr[(n-1)%arr.length];
+}
+
 // ═══════════════════════════════════════════
 // Starfield
 // ═══════════════════════════════════════════
@@ -615,6 +688,27 @@ function doPersonal(){
       <div class="cta-title">毎日のKINエネルギーを受け取る</div>
       <div class="cta-desc">260のKINが織りなす宇宙のリズムを<br>毎日お届けしています。</div>
       <a class="btn-ig" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">@kinuranai をフォロー</a>
+      <br><a class="btn-line" href="https://lin.ee/kinuranai" target="_blank" rel="noopener" onclick="markLineClick()">LINEで深層鑑定を受け取る</a>
+    </div>
+
+    <div class="premium-section ${isUnlocked()?'':'locked'}">
+      <div class="premium-content">
+        <div class="premium-title">深層鑑定 — KIN${kin}「${seal}」のあなたへ</div>
+        <ul class="premium-list">
+          <li><b>2026年下半期の3つの転機</b>: ${getDeepFortune(seal,1)}</li>
+          <li><b>恋愛で「運命の人」と出会うタイミング</b>: ${getDeepFortune(seal,2)}</li>
+          <li><b>仕事で開花する才能と注意点</b>: ${getDeepFortune(seal,3)}</li>
+          <li><b>金運の波と最適な投資時期</b>: ${getDeepFortune(seal,4)}</li>
+          <li><b>あなたの裏KIN — 隠れた本性</b>: KIN${261-kin}「${(SEALS[((261-kin)%20)||20]||{ja:''}).ja}」のエネルギーが内側に潜んでいます</li>
+        </ul>
+      </div>
+      <div class="unlock-overlay">
+        <div class="unlock-icon">🔮</div>
+        <div class="unlock-title">深層鑑定をアンロック</div>
+        <div class="unlock-desc">あなたのKIN${kin}に向けた<br>「2026年下半期の転機」「裏KIN」など5項目の<br>個別鑑定をLINE登録で全公開。</div>
+        <a class="btn-line" href="https://lin.ee/kinuranai" target="_blank" rel="noopener" onclick="markLineClick()">LINEで無料アンロック</a>
+        <div class="unlock-meta">登録後、生年月日を送信するだけ。<br>毎日のKINメッセージも受け取れます。</div>
+      </div>
     </div>
   `;
   card.scrollIntoView({behavior:'smooth',block:'start'});
@@ -754,6 +848,7 @@ function doCompat(){
         <div class="cta-title">毎日のKINエネルギーを受け取る</div>
         <div class="cta-desc">ふたりの相性をさらに深く知るために<br>毎日のKIN情報をチェック</div>
         <a class="btn-ig" href="https://www.instagram.com/kinuranai/" target="_blank" rel="noopener">@kinuranai をフォロー</a>
+        <br><a class="btn-line" href="https://lin.ee/kinuranai" target="_blank" rel="noopener" onclick="markLineClick()">LINEで個別相性アドバイス</a>
       </div>
     </div>
   `;
