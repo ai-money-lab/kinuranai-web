@@ -8,6 +8,8 @@
 [note無料記事] → [サイト無料診断] → [LINE登録] → [生年月日送信] → [KIN自動返信] → [AI鑑定¥1,980決済] → [鑑定文LINE配信] → [Zoom¥8,800オファー]
 ```
 
+決済代行: **PAY.JP** (Stripe代替・占い・スピリチュアル業界の審査通過実績あり・GMO系)
+
 ---
 
 ## Step 1. LINE公式アカウント開設 (所要15分)
@@ -36,56 +38,58 @@
 
 ---
 
-## Step 2. Stripe アカウント開設 (所要30分)
+## Step 2. PAY.JP 登録 (所要30〜60分)
 
-### 2-1. Stripe登録
-1. https://dashboard.stripe.com/register にアクセス
-2. メール+ビジネス情報入力
-3. 本人確認書類アップロード (運転免許証等)
-4. 入金先口座登録
+**Why PAY.JP**: Stripeは占い/スピリチュアル業界で審査落ち多数。PAY.JPは占いコンテンツ業界での審査通過実績あり。GMOグループ運営で個人事業主でも開設可。
 
-### 2-2. 商品作成
-Dashboard → 商品 → 商品を追加 で **3商品** 登録:
+### 2-1. アカウント作成
+1. https://pay.jp/ 「お申込み」→ メール+パスワードで登録
+2. テスト環境APIキー (`pk_test_xxx` / `sk_test_xxx`) が即時発行される
+3. **テスト環境で先に動作確認** → 本番審査申請の流れがおすすめ
 
-**商品1: KIN AI文字鑑定**
-- 価格: ¥1,980 (一括)
-- 「価格IDをコピー」 → `STRIPE_PRICE_AI_DIVINATION`
+### 2-2. テスト環境で動作確認
+1. ダッシュボード → API → publishable key/secret key コピー
+2. Vercel env に `PAYJP_PUBLIC_KEY=pk_test_xxx` / `PAYJP_SECRET_KEY=sk_test_xxx` 一旦セット
+3. https://kinuranai.vercel.app/checkout.html?product=ai_divination&kin=47 を開く
+4. テストカード `4242 4242 4242 4242 / 12/34 / 123` で決済
+5. LINE 連携も含めて動作確認
 
-**商品2: KIN Zoom個人鑑定 60分**
-- 価格: ¥8,800 (一括)
-- 「価格IDをコピー」 → `STRIPE_PRICE_ZOOM_60MIN`
+### 2-3. 本番環境申請
+1. ダッシュボード → 設定 → 本人確認・事業者情報入力
+2. 本人確認書類 (運転免許証等) アップロード
+3. 売上入金口座登録
+4. **業種選択**: 「コンテンツ販売 (占い・診断系)」
+5. 審査期間 約3-7営業日
 
-**商品3: 月額KINニュースレター**
-- 価格: ¥1,100 / 月 (定期支払い)
-- 「価格IDをコピー」 → `STRIPE_PRICE_MONTHLY_NEWS`
+### 2-4. プラン作成 (月額用・本番審査通過後)
+1. ダッシュボード → 商品 → プラン → 新規作成
+2. 名前: `月額KINニュースレター` / 金額: `1100` / 通貨: JPY / 期間: 月
+3. 作成後の `plan_xxxxx` を `PAYJP_PLAN_MONTHLY_NEWS` env に設定
+4. 一括決済 (¥1,980 AI鑑定 / ¥8,800 Zoom) は **プラン不要** (charge直接作成)
 
-### 2-3. APIキー取得
-1. Dashboard → 開発者 → APIキー
-2. **シークレットキー** (`sk_live_xxx`) をコピー → `STRIPE_SECRET_KEY`
-
-### 2-4. Webhook 設定
-1. Dashboard → 開発者 → Webhook → エンドポイントを追加
-2. URL: `https://kinuranai.vercel.app/api/stripe-webhook`
-3. イベント: `checkout.session.completed`
-4. 「シグネチャシークレット」(`whsec_xxx`) をコピー → `STRIPE_WEBHOOK_SECRET`
+### 2-5. Webhook 設定
+1. ダッシュボード → Webhook → エンドポイント追加
+2. URL: `https://kinuranai.vercel.app/api/payjp-webhook`
+3. シグネチャ用シークレット文字列を生成 (例: `openssl rand -hex 32`)
+4. Webhook secret を Vercel env `PAYJP_WEBHOOK_SECRET` に設定
+5. イベント選択: `subscription.renewed` / `subscription.deleted` / `charge.refunded`
 
 ---
 
 ## Step 3. Vercel env 設定 (所要10分)
 
 1. https://vercel.com/ai-money-lab/kinuranai-web/settings/environment-variables
-2. 以下のすべてを Production / Preview / Development すべてにチェックして追加:
+2. 以下のすべてを Production / Preview / Development にチェックして追加:
 
 ```
 LINE_CHANNEL_SECRET = (Step 1-2 で取得)
 LINE_CHANNEL_ACCESS_TOKEN = (Step 1-2 で取得)
 LINE_OFFICIAL_URL = https://lin.ee/xxxxx (Step 1-4)
 
-STRIPE_SECRET_KEY = sk_live_xxx (Step 2-3)
-STRIPE_WEBHOOK_SECRET = whsec_xxx (Step 2-4)
-STRIPE_PRICE_AI_DIVINATION = price_xxx (Step 2-2 商品1)
-STRIPE_PRICE_ZOOM_60MIN = price_xxx (Step 2-2 商品2)
-STRIPE_PRICE_MONTHLY_NEWS = price_xxx (Step 2-2 商品3)
+PAYJP_PUBLIC_KEY = pk_live_xxx (Step 2-3 本番)
+PAYJP_SECRET_KEY = sk_live_xxx (Step 2-3 本番)
+PAYJP_WEBHOOK_SECRET = (Step 2-5 で生成した hex)
+PAYJP_PLAN_MONTHLY_NEWS = plan_xxx (Step 2-4)
 
 ANTHROPIC_API_KEY = sk-ant-xxx (HIROKIが既に持っているはず)
 CLAUDE_MODEL = claude-sonnet-4-5
@@ -98,13 +102,29 @@ INTERNAL_API_SECRET = (任意のランダム文字列・openssl rand -hex 32 等
 
 ---
 
-## Step 4. index.html の LINE URL 差し替え (所要5分)
+## Step 4. checkout.html の publishable key 差し替え (所要2分)
+
+PAY.JP Checkout iframeは publishable key をフロント側に埋め込む必要あり。
+
+```bash
+cd C:/Users/mauloa/Projects/kinuranai-web
+# pk_test_PLACEHOLDER_REPLACE_AT_DEPLOY を実publishable keyに置換
+sed -i 's|pk_test_PLACEHOLDER_REPLACE_AT_DEPLOY|pk_live_実キー|g' checkout.html
+git add checkout.html
+git commit -m "fix: replace PAY.JP public key with production"
+git push origin master
+```
+
+(または index.html の手前で `<script>window.PAYJP_PK_OVERRIDE = 'pk_live_xxx'</script>` を挿入)
+
+---
+
+## Step 5. index.html の LINE URL 差し替え (所要2分)
 
 現在 `https://lin.ee/kinuranai` プレースホルダー。Step 1-4 で取得した実URLに差し替え:
 
 ```bash
 cd C:/Users/mauloa/Projects/kinuranai-web
-# https://lin.ee/kinuranai を実URLに置換
 sed -i 's|https://lin.ee/kinuranai|https://lin.ee/REAL_URL|g' index.html
 git add index.html
 git commit -m "fix: replace LINE URL with real account"
@@ -113,20 +133,20 @@ git push origin master
 
 ---
 
-## Step 5. 動作確認
+## Step 6. 動作確認
 
-### 5-1. LINE Bot
+### 6-1. LINE Bot
 1. LINE で `KINURANAI` 公式アカウントを友だち追加
 2. メッセージ「1990年3月15日」を送信
 3. KIN番号+紋章+音 + AI鑑定¥1,980オファーが返ってくれば成功
 
-### 5-2. Stripe checkout
+### 6-2. PAY.JP checkout
 1. AI鑑定オファー内のリンクをタップ
-2. Stripe checkout が開く
-3. テストカード `4242 4242 4242 4242 / 12/34 / 123` で決済
-4. 成功 → サイトに `?paid=1` で戻る + LINE で鑑定文が届く
+2. checkout.html が開き商品名+金額+カード入力フォーム表示
+3. テストカード `4242 4242 4242 4242 / 12/34 / 123` で決済 (テスト環境)
+4. 成功 → 「✅ 決済が完了しました」表示 + LINE で鑑定文届く
 
-### 5-3. note → サイト誘導
+### 6-3. note → サイト誘導
 1. https://note.com/kinuranai/n/ncc964f72c302 (flagship#01) を開く
 2. 末尾の「無料診断・マガジンで深める」セクションから kinuranai.vercel.app へ
 3. 個人診断結果ページの「深層鑑定」ボタンから LINE登録URL へ
@@ -149,15 +169,28 @@ git push origin master
 合計 約¥118,800/月 (Phase A完成時)
 ```
 
+PAY.JP 手数料 3.0% を引くと実収益は約 **¥115,200/月**。
+
 ---
 
 ## トラブルシューティング
 
-- **LINE webhook が 400 を返す** → Channel Secret が違う or env未反映
-- **Stripe checkout が 503** → STRIPE_PRICE_xxx が未設定
-- **鑑定文がLINEに届かない** → STRIPE_WEBHOOK_SECRET / INTERNAL_API_SECRET 未設定
+- **LINE webhook が 401 を返す** → LINE_CHANNEL_SECRET が違う or env未反映
+- **PAY.JP charge 503** → PAYJP_SECRET_KEY 未設定
+- **checkout.html ボタンが出ない** → publishable key が `pk_test_PLACEHOLDER` のまま
+- **鑑定文がLINEに届かない** → INTERNAL_API_SECRET 未設定 or LINE_CHANNEL_ACCESS_TOKEN 未設定
+- **PAY.JP 審査が通らない** → 業種を「コンテンツ販売」にし「占い」と明記+免責事項追加で再申請
 - **ANTHROPIC_API_KEY 余計に消費** → CLAUDE_MODEL を `claude-haiku-4-5` に切替で1/3コスト
 
 ---
 
-最終更新: 2026-05-01
+## 補足: PAY.JP Checkout iframe の挙動
+
+- このプロジェクトでは `checkout.html` がハイブリッド型 (静的HTML + payjp.js iframe) を採用
+- カード番号は **payjp.js が直接 PAY.JP サーバへ送信** → トークンのみ当サイト経由
+- PCI DSS は PAY.JP 側が責任を持つため当サイト側でのカード情報保管なし
+- LINE アプリ内ブラウザでも動作 (iframe対応)
+
+---
+
+最終更新: 2026-05-01 (Stripe → PAY.JP 切替版)

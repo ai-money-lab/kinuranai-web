@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KIN鑑定 決済 | KINURANAI</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--bg:#0c0418;--card:rgba(60,30,90,.5);--gold:#D4AF37;--text:#fff;--sub:#b8a8d8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;background:linear-gradient(180deg,#0c0418 0%,#1d0830 50%,#0c0418 100%);color:var(--text);min-height:100vh;padding:24px}
+.wrap{max-width:480px;margin:0 auto}
+h1{font-family:'Noto Serif JP',serif;color:var(--gold);text-align:center;margin:32px 0 16px;font-size:1.4rem;font-weight:700}
+.product{background:var(--card);border:1px solid rgba(212,175,55,.3);border-radius:20px;padding:24px;margin-bottom:24px}
+.label{color:var(--sub);font-size:.85rem;margin-bottom:6px}
+.name{font-size:1.15rem;font-weight:700;margin-bottom:14px}
+.price{color:var(--gold);font-size:2rem;font-weight:700;font-family:'Noto Serif JP',serif}
+.tax{color:var(--sub);font-size:.75rem;margin-left:6px}
+.field{margin-bottom:14px}
+.field label{display:block;color:var(--sub);font-size:.78rem;margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;background:rgba(0,0,0,.3);border:1px solid rgba(212,175,55,.25);border-radius:10px;color:#fff;font-size:.95rem}
+.field input:focus{outline:none;border-color:var(--gold)}
+.notice{font-size:.78rem;color:var(--sub);line-height:1.7;background:rgba(0,0,0,.25);padding:12px 14px;border-radius:10px;margin-bottom:16px}
+button.pay{display:block;width:100%;padding:16px;margin-top:18px;background:linear-gradient(135deg,#D4AF37,#B8860B);color:#1a1a1a;border:0;border-radius:50px;font-weight:700;font-size:1rem;cursor:pointer;letter-spacing:.05em;box-shadow:0 4px 16px rgba(212,175,55,.4)}
+button.pay:disabled{opacity:.4;cursor:not-allowed}
+.payjp-msg{font-size:.72rem;color:var(--sub);text-align:center;margin-top:14px;line-height:1.6}
+#status{margin-top:20px;padding:14px;border-radius:10px;display:none;font-size:.9rem;line-height:1.6}
+#status.ok{display:block;background:rgba(60,160,90,.2);border:1px solid #6ec48b;color:#a3e6b8}
+#status.err{display:block;background:rgba(180,40,40,.2);border:1px solid #c66;color:#ffb0b0}
+.foot{text-align:center;color:var(--sub);font-size:.7rem;margin-top:24px;line-height:1.7}
+.foot a{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🔮 KIN鑑定 決済</h1>
+<div class="product">
+  <div class="label">商品</div>
+  <div class="name" id="p-name">読み込み中...</div>
+  <div class="price"><span id="p-price">--</span><span class="tax">円(税込)</span></div>
+</div>
+
+<div class="notice">
+✅ クレジットカード情報はPAY.JP社の暗号化された決済ゲートウェイで処理され、当サイトには保存されません。<br>
+✅ 決済完了後、ご登録のLINEに鑑定結果が自動配信されます。
+</div>
+
+<div class="field">
+  <label for="email">メールアドレス（領収書送付用）</label>
+  <input type="email" id="email" placeholder="example@example.com">
+</div>
+<div class="field">
+  <label for="line_user_id">LINEユーザーID（LINEから来た場合は自動入力）</label>
+  <input type="text" id="line_user_id" placeholder="Uxxxxxxxxxxxxxxxxxxxxxxx">
+</div>
+
+<form>
+<script src="https://checkout.pay.jp/" class="payjp-button"
+        data-key="pk_test_PLACEHOLDER_REPLACE_AT_DEPLOY"
+        data-text="クレジットカードで支払う"
+        data-submit-text="支払う"
+        data-on-created="onPayjpToken">
+</script>
+</form>
+
+<div id="status"></div>
+<div class="foot">
+  決済処理: <a href="https://pay.jp/" target="_blank" rel="noopener">PAY.JP (PCI DSS準拠)</a><br>
+  KINURANAI © 2026
+</div>
+</div>
+
+<script>
+// URLパラメータから商品情報を取得
+const PRICES = {
+  ai_divination: { name: 'KIN AI文字鑑定 (5項目深層鑑定)', amount: 1980 },
+  zoom_60min:    { name: 'KIN Zoom個人鑑定 60分',          amount: 8800 },
+  monthly_news:  { name: '月額KINニュースレター',           amount: 1100 },
+};
+
+const u = new URL(location.href);
+const product = u.searchParams.get('product') || 'ai_divination';
+const kin = u.searchParams.get('kin') || '';
+const birthdate = u.searchParams.get('birthdate') || '';
+const lineUserId = u.searchParams.get('line_user_id') || '';
+
+const cfg = PRICES[product] || PRICES.ai_divination;
+document.getElementById('p-name').textContent = cfg.name + (kin ? ` (KIN${kin})` : '');
+document.getElementById('p-price').textContent = cfg.amount.toLocaleString();
+if (lineUserId) document.getElementById('line_user_id').value = lineUserId;
+
+// PAY.JP Checkout のpublishable keyを HTML 上で書き換える
+// (本番ではVercel envからの値を Vercel build時に置換するのが理想だが、簡易には公開鍵なので埋め込みOK)
+const PAYJP_PK = window.PAYJP_PK_OVERRIDE || 'pk_test_PLACEHOLDER_REPLACE_AT_DEPLOY';
+document.querySelector('.payjp-button').setAttribute('data-key', PAYJP_PK);
+
+window.onPayjpToken = function(payload) {
+  const status = document.getElementById('status');
+  status.className = '';
+  status.textContent = '決済処理中...';
+  status.className = 'ok';
+
+  fetch('/api/payjp-charge', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      token: payload.id,
+      product,
+      kin,
+      birthdate,
+      line_user_id: document.getElementById('line_user_id').value || lineUserId,
+      email: document.getElementById('email').value,
+    }),
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      status.className = 'ok';
+      status.innerHTML = `✅ 決済が完了しました。<br>` +
+        (product === 'ai_divination'
+          ? 'LINEに鑑定結果をお届けします（数分以内）。'
+          : 'ご予約のご連絡をLINEでお送りします。');
+      try {
+        localStorage.setItem('kinuranai_line_unlocked', '1');
+        localStorage.setItem('kinuranai_purchased_' + product, new Date().toISOString());
+      } catch (e) {}
+    } else {
+      status.className = 'err';
+      status.textContent = '❌ 決済に失敗しました: ' + (data.error || '不明なエラー');
+    }
+  }).catch(e => {
+    status.className = 'err';
+    status.textContent = '❌ 通信エラー: ' + e.message;
+  });
+};
+</script>
+</body>
+</html>

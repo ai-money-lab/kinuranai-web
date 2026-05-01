@@ -75,8 +75,8 @@ function buildKinReply(birthdate) {
         `📿 もっと深く知りたい方へ\n\n` +
         `あなたのKIN${kin}に向けた「2026年下半期の3つの転機」「裏KIN」「運命の人と出会うタイミング」を含む\n` +
         `🔮 AI鑑定 ¥1,980\n\n` +
-        `下のリンクから決済できます:\n` +
-        `${process.env.PUBLIC_BASE_URL || 'https://kinuranai.vercel.app'}/api/stripe-checkout?product=ai_divination&kin=${kin}`,
+        `下のリンクから決済できます (PAY.JP・カード対応):\n` +
+        `${process.env.PUBLIC_BASE_URL || 'https://kinuranai.vercel.app'}/checkout.html?product=ai_divination&kin=${kin}&birthdate=${birthdate.y}-${birthdate.m}-${birthdate.d}`,
     },
   ];
 }
