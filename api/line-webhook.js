@@ -91,6 +91,53 @@ async function handleEvent(event) {
     return client.replyMessage({ replyToken: event.replyToken, messages: buildKinReply(date) });
   }
 
+  // 「今日のKIN」キーワード
+  if (text === '今日のKIN' || text === '今日') {
+    try {
+      const baseUrl = process.env.PUBLIC_BASE_URL || 'https://kinuranai.vercel.app';
+      const r = await fetch(`${baseUrl}/api/today-kin`);
+      const data = await r.json();
+      return client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [{ type: 'text', text: data.formatted_text || '今日のKIN取得失敗' }],
+      });
+    } catch (e) {
+      // fall through to help
+    }
+  }
+
+  // 「Q&A」キーワード
+  if (text === 'Q&A' || text === 'よくある質問') {
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{
+        type: 'text',
+        text:
+          `💭 占いに関するよくある質問\n\n` +
+          `Q. 当たりますか？\n→ 占いは判断材料の一つ。最終的な選択はあなた自身が行うものですが、KINの傾向はマヤ文明から伝わる5,000年以上の歴史ある知恵です。\n\n` +
+          `Q. 鑑定はどう届く?\n→ 決済後、ご登録のLINEに数分以内にClaude AIによる5項目深層鑑定が届きます。\n\n` +
+          `Q. 返金できる?\n→ デジタルコンテンツの性質上、原則返金不可ですが内容に問題があればこのLINEで返信ください。\n\n` +
+          `Q. もっと深く占いたい\n→ 5占術 (マヤ暦+西洋占星術+タロット+四柱推命+易経) を統合した「ホシトワ」もあります → https://hoshitowa.vercel.app/`,
+      }],
+    });
+  }
+
+  // 「ホシトワ」「HOSHITOWA」「5占術」キーワード → cross-sell
+  if (/ホシトワ|hoshitowa|5占術|占術全部/i.test(text)) {
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{
+        type: 'text',
+        text:
+          `🌟 HOSHITOWA (ホシトワ) のご紹介\n\n` +
+          `KINURANAIはマヤ暦KIN占い専門ですが、姉妹サービス HOSHITOWA は5つの占術を統合した深層鑑定サービスです。\n\n` +
+          `✦ マヤ暦KIN占い\n✦ 西洋占星術\n✦ タロット\n✦ 四柱推命\n✦ 易経\n\n` +
+          `5占術が同じ答えを指す時、それは偶然ではない。\n\n` +
+          `LINE登録で3日間の無料体験つき:\nhttps://hoshitowa.vercel.app/`,
+      }],
+    });
+  }
+
   // ヘルプ
   return client.replyMessage({
     replyToken: event.replyToken,
@@ -100,7 +147,11 @@ async function handleEvent(event) {
         `KINURANAIへようこそ✨\n\n` +
         `生年月日を送ると、あなたのKIN番号と紋章をお伝えします。\n\n` +
         `例:\n  1995年3月15日\n  1995/3/15\n  19950315\n\n` +
-        `毎日のKINメッセージも自動配信中💫`,
+        `他のキーワード:\n` +
+        `「今日のKIN」 - 本日の宇宙からのメッセージ\n` +
+        `「Q&A」 - よくある質問\n` +
+        `「ホシトワ」 - 5占術統合鑑定サービスの案内\n\n` +
+        `毎朝7:00、登録者全員に今日のKINを自動配信中💫`,
     }],
   });
 }
